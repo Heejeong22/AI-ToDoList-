@@ -1,63 +1,210 @@
-# Dependencies
-node_modules/
+# Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,visualstudiocode
+
+# Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,visualstudiocode
+
+### macOS ###
+# macOS 시스템이 자동 생성하는 파일들
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 아이콘 파일 특수 규칙
+Icon
+
+# macOS이 자동 생성하는 임시 파일들
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# AFP 공유 환경에서 자동 생성
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### macOS Patch ###
+*.icloud
+
+### Node ###
+# 로그 파일
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# Production builds
-dist/
-dist-electron/
-release/
+# Node 진단 리포트
+report.*.json
 
-# Database
-src/main/db/database.sqlite
-*.db
-*.sqlite
-*.sqlite3
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-logs/
-*.log
-
-# Runtime data
-pids/
+# 런타임 데이터
+pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
-coverage/
+# Code coverage
+coverage
+*.lcov
+.nyc_output
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Grunt
+.grunt
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+# Bower
+bower_components
+
+# node-waf
+.lock-wscript
+
+# Node addons
+build/Release
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Snowpack
+web_modules/
+
+# TS 컴파일 캐시
+*.tsbuildinfo
+
+# npm/yarn 캐시
+.npm
+.eslintcache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# REPL history
+.node_repl_history
+
+# npm pack 결과물
+*.tgz
+
+# yarn integrity
+.yarn-integrity
+
+# dotenv 환경 파일 (절대 올리면 안됨)
+.env
+.env.*.local
+
+# Parcel
+.cache
+.parcel-cache
+
+# Next.js
+.next
+out
+
+# Nuxt.js
+.nuxt
+dist
+
+# Gatsby
+.cache/
+
+# VuePress
+.vuepress/dist
+.temp
+
+# Docusaurus
+.docusaurus
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# VSCode 테스트용
+.vscode-test
+
+# Yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+### Node Patch ###
+.webpack/
+.svelte-kit
+
+### VisualStudioCode ###
+.vscode/*
+
+# 단, 팀 설정은 공유 가능
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+.history/
+*.vsix
+
+### Windows ###
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
 
-# Electron specific
-app/dist/
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+*.lnk
+
+# -------------------------------------------------------
+# Electron + Vite + React + Drizzle + SQLite 추가 필수 ignore
+# -------------------------------------------------------
+
+### Electron build output (절대 Git에 올리면 안됨) ###
+dist-electron/
+out/
 release/
+build/
+*.asar
 
-# Drizzle
-drizzle/meta/
+### Vite ###
+.vite/
 
-# Temporary files
-*.tmp
-*.temp
+### Drizzle ORM ###
+drizzle/
+.migrations/
+
+### SQLite 데이터베이스 파일 ###
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+
+### Temporary ###
+tmp/
+temp/
+debug.log
