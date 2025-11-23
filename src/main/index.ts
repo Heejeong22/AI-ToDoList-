@@ -1,14 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { createWindow } from './windows.js'
-import { registerShortcuts } from './shortcuts.js'
-import { setupTodoHandlers } from './ipc/todoHandlers.js'
-import { setupAiHandlers } from './ipc/aiHandlers.js'
-import { setupAppHandlers } from './ipc/appHandlers.js'
-import { initializeDatabase } from './db/drizzle.js'
+import { createWindow } from './windows'
+import { registerShortcuts } from './shortcuts'
+import { setupTodoHandlers } from './ipc/todoHandlers'
+import { setupAiHandlers } from './ipc/aiHandlers'
+import { setupAppHandlers } from './ipc/appHandlers'
+import * as Drizzle from './db/drizzle'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null
@@ -17,7 +14,7 @@ let mainWindow: BrowserWindow | null = null
 app.whenReady().then(async () => {
   try {
     // Initialize database
-    await initializeDatabase()
+    await Drizzle.initializeDatabase()
 
     // Create the main window
     mainWindow = createWindow()
@@ -51,11 +48,14 @@ app.on('window-all-closed', () => {
 })
 
 // Security: Prevent new window creation
-app.on('web-contents-created', (event, contents) => {
-  contents.on('new-window', (event, navigationUrl) => {
-    event.preventDefault()
-  })
-})
+app.on('web-contents-created', (_event, contents) => {
+  contents.setWindowOpenHandler(({ url }) => {
+    // 모든 새 창 생성을 방지합니다.
+    // 필요에 따라 특정 URL만 허용할 수 있습니다.
+    console.log(`새 창 생성 시도: ${url}`);
+    return { action: 'deny' };
+  });
+});
 
 // Handle app ready to show
 app.on('ready', () => {

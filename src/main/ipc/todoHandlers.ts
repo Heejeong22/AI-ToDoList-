@@ -1,7 +1,7 @@
 import { IpcMain } from 'electron'
-import { db } from '../db/drizzle.js'
-import { todos, categories, tags } from '../db/schema.js'
-import { eq, and, or, like, desc } from 'drizzle-orm'
+import { db } from '../db/drizzle'
+import { todos } from '../db/schema'
+import { eq, or, like, desc } from 'drizzle-orm'
 
 export function setupTodoHandlers(ipcMain: IpcMain): void {
   // 모든 Todo 가져오기
@@ -11,7 +11,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result }
     } catch (error) {
       console.error('Error fetching todos:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -28,7 +28,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result[0] }
     } catch (error) {
       console.error('Error creating todo:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -57,7 +57,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result[0] }
     } catch (error) {
       console.error('Error updating todo:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -68,7 +68,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true }
     } catch (error) {
       console.error('Error deleting todo:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -98,7 +98,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result[0] }
     } catch (error) {
       console.error('Error toggling todo completion:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -121,7 +121,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result }
     } catch (error) {
       console.error('Error searching todos:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -137,7 +137,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result }
     } catch (error) {
       console.error('Error filtering todos by category:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -153,7 +153,7 @@ export function setupTodoHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result }
     } catch (error) {
       console.error('Error filtering todos by priority:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 }

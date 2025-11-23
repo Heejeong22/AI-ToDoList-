@@ -1,6 +1,6 @@
 import { IpcMain } from 'electron'
-import { db } from '../db/drizzle.js'
-import { aiAnalyses, todos } from '../db/schema.js'
+import { db } from '../db/drizzle'
+import { aiAnalyses } from '../db/schema'
 import { eq } from 'drizzle-orm'
 
 // 간단한 AI 분석 함수들 (실제로는 OpenAI API나 다른 AI 서비스를 사용)
@@ -85,7 +85,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error analyzing priority:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -108,7 +108,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error analyzing category:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -131,7 +131,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error estimating time:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -162,7 +162,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error in comprehensive analysis:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -182,7 +182,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       return { success: true, data: savedAnalysis[0] }
     } catch (error) {
       console.error('Error saving AI analysis:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -204,7 +204,7 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error fetching AI analysis history:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 }

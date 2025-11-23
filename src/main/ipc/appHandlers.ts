@@ -1,9 +1,7 @@
 import { IpcMain, app, dialog } from 'electron'
-import { db } from '../db/drizzle.js'
-import { userSettings, statistics } from '../db/schema.js'
-import { eq } from 'drizzle-orm'
-import fs from 'fs'
-import path from 'path'
+import { db } from '../db/drizzle'
+import { userSettings, statistics } from '../db/schema'
+import { sql } from 'drizzle-orm'
 import os from 'os'
 
 export function setupAppHandlers(ipcMain: IpcMain): void {
@@ -34,7 +32,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       return { success: true, data: settingsMap }
     } catch (error) {
       console.error('Error fetching settings:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -52,7 +50,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       return { success: true }
     } catch (error) {
       console.error('Error saving setting:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -78,7 +76,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       return { success: true }
     } catch (error) {
       console.error('Error saving settings:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -128,7 +126,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error opening file dialog:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -150,7 +148,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error opening folder dialog:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -173,7 +171,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       }
     } catch (error) {
       console.error('Error opening save dialog:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -194,7 +192,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result[0] }
     } catch (error) {
       console.error('Error saving statistics:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 
@@ -216,7 +214,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
       return { success: true, data: result }
     } catch (error) {
       console.error('Error fetching statistics:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   })
 

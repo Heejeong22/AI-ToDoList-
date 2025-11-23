@@ -14,7 +14,6 @@ export function createWindow(): BrowserWindow {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       preload: path.join(__dirname, '../preload/preload.js'),
     },
     titleBarStyle: 'default',
@@ -53,7 +52,6 @@ export function createSettingsWindow(parentWindow: BrowserWindow): BrowserWindow
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       preload: path.join(__dirname, '../preload/preload.js'),
     },
     title: '설정',
