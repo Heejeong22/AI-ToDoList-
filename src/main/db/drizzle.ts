@@ -38,5 +38,5 @@ export async function initializeDatabase(): Promise<void> {
 if (process.env.NODE_ENV === 'development') {
   console.log('Database path:', dbPath)
 }
-
+//db수정작업
 export default db
