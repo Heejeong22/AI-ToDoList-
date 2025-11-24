@@ -6,7 +6,7 @@
   "author": "HeeJung",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently -k -n VITE,ELECTRON \"vite\" \"wait-on tcp:5173 && cross-env NODE_ENV=development electron .\"",
+    "dev": "concurrently -k -n VITE,ELECTRON \"vite\" \"wait-on tcp:5173 && npm run electron-main:build && cross-env NODE_ENV=development electron .\"",
     "preview": "vite preview",
     "electron": "electron .",
     "electron-main:build": "vite build --config electron.vite.config.ts",
@@ -35,7 +35,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
-    "drizzle-kit": "^0.31.7",
+    "drizzle-kit": "^0.18.1",
     "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
     "typescript": "^5.9.3",
