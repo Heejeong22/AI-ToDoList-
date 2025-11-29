@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './AIAnalysisPanel.css'
+import '../styles/AIAnalysisPanel.css'
 
 interface Todo {
   title: string

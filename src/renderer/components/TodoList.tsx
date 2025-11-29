@@ -1,6 +1,6 @@
 import React from 'react'
 import TodoItem from './TodoItem'
-import './TodoList.css'
+import '../styles/TodoList.css'
 
 interface Todo {
   id: number

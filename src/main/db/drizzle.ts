@@ -1,5 +1,4 @@
 import { db, dbPath, sqlite } from './connection.js'
-import * as schema from './schema.js'
 
 // 데이터베이스 연결 종료 함수
 export function closeDatabase(): void {
@@ -9,7 +8,24 @@ export function closeDatabase(): void {
 // 마이그레이션 및 초기화 함수
 export async function initializeDatabase(): Promise<void> {
   try {
-    // DB 초기화는 connection.ts에서 이미 처리됨
+    // todos 테이블이 없으면 생성 (단일 테이블 스키마)
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        title TEXT NOT NULL,
+        category TEXT,
+        priority INTEGER,
+        tags TEXT,
+        alert_time INTEGER,
+        due_date INTEGER,
+        completed INTEGER DEFAULT 0,
+        pinned INTEGER DEFAULT 0,
+        created_at INTEGER DEFAULT (strftime('%s','now')),
+        updated_at INTEGER,
+        deleted_at INTEGER
+      );
+    `)
+
     console.log('Database initialized successfully')
     console.log('Database path:', dbPath)
   } catch (error) {
