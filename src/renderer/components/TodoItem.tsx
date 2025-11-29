@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './TodoItem.css'
+import '../styles/TodoItem.css'
 
 interface Todo {
   id: number

@@ -1,7 +1,5 @@
 import { IpcMain } from 'electron'
 import { db } from '../db/drizzle'
-import { aiAnalyses } from '../db/schema'
-import { eq } from 'drizzle-orm'
 
 // 간단한 AI 분석 함수들 (실제로는 OpenAI API나 다른 AI 서비스를 사용)
 function analyzePriority(title: string, description?: string): { priority: 'low' | 'medium' | 'high', confidence: number } {
@@ -166,45 +164,5 @@ export function setupAiHandlers(ipcMain: IpcMain): void {
     }
   })
 
-  // AI 분석 결과 저장
-  ipcMain.handle('ai:saveAnalysis', async (_, { todoId, analysisType, result, confidence }) => {
-    try {
-      const savedAnalysis = await db
-        .insert(aiAnalyses)
-        .values({
-          todoId,
-          analysisType,
-          result: JSON.stringify(result),
-          confidence,
-        })
-        .returning()
-
-      return { success: true, data: savedAnalysis[0] }
-    } catch (error) {
-      console.error('Error saving AI analysis:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
-
-  // Todo에 대한 AI 분석 기록 가져오기
-  ipcMain.handle('ai:getAnalysisHistory', async (_, todoId) => {
-    try {
-      const analyses = await db
-        .select()
-        .from(aiAnalyses)
-        .where(eq(aiAnalyses.todoId, todoId))
-        .orderBy(aiAnalyses.createdAt)
-
-      return {
-        success: true,
-        data: analyses.map(analysis => ({
-          ...analysis,
-          result: JSON.parse(analysis.result)
-        }))
-      }
-    } catch (error) {
-      console.error('Error fetching AI analysis history:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
+  // (단순 버전) 분석 결과는 DB에 저장하지 않고 응답만 반환
 }

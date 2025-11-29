@@ -1,17 +1,4 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import * as schema from './schema.js'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const dbPath = path.join(__dirname, 'database.sqlite')
-
-// SQLite 데이터베이스 연결
-const sqlite = new Database(dbPath)
-
-// Drizzle ORM 인스턴스 생성
-export const db = drizzle(sqlite, { schema })
+import { db, dbPath, sqlite } from './connection.js'
 
 // 데이터베이스 연결 종료 함수
 export function closeDatabase(): void {
@@ -21,22 +8,31 @@ export function closeDatabase(): void {
 // 마이그레이션 및 초기화 함수
 export async function initializeDatabase(): Promise<void> {
   try {
-    // WAL 모드 활성화 (성능 향상)
-    sqlite.pragma('journal_mode = WAL')
-
-    // 외래 키 제약 조건 활성화
-    sqlite.pragma('foreign_keys = ON')
+    // todos 테이블이 없으면 생성 (단일 테이블 스키마)
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        title TEXT NOT NULL,
+        category TEXT,
+        priority INTEGER,
+        tags TEXT,
+        alert_time INTEGER,
+        due_date INTEGER,
+        completed INTEGER DEFAULT 0,
+        pinned INTEGER DEFAULT 0,
+        created_at INTEGER DEFAULT (strftime('%s','now')),
+        updated_at INTEGER,
+        deleted_at INTEGER
+      );
+    `)
 
     console.log('Database initialized successfully')
+    console.log('Database path:', dbPath)
   } catch (error) {
     console.error('Database initialization failed:', error)
     throw error
   }
 }
-
-// 개발 모드에서만 데이터베이스 파일 경로 로깅
-if (process.env.NODE_ENV === 'development') {
-  console.log('Database path:', dbPath)
-}
-//db수정작업
+// db 인스턴스를 기본/이름 export 모두 제공
+export { db }
 export default db
