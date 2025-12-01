@@ -5,27 +5,65 @@ import fs from "fs";
 import { app } from "electron";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
-// 1. 사용자 홈 디렉토리 경로 가져오기
-const homeDir = app.getPath("home");
+// DB 인스턴스들을 저장할 변수
+let sqlite: Database.Database | null = null;
+let db: BetterSQLite3Database | null = null;
+let dbPath: string | null = null;
 
-// 2. 앱 전용 폴더 생성: ~/.ai-todo-app/database
-const appDataDir = path.join(homeDir, ".ai-todo-app", "database");
+// DB 초기화 함수 (app.whenReady() 이후에 호출해야 함)
+export function initializeConnection(): void {
+  if (sqlite !== null) {
+    // 이미 초기화됨
+    return;
+  }
 
-// 폴더 없으면 자동 생성
-if (!fs.existsSync(appDataDir)) {
-  fs.mkdirSync(appDataDir, { recursive: true });
+  // 1. 사용자 홈 디렉토리 경로 가져오기
+  const homeDir = app.getPath("home");
+
+  // 2. 앱 전용 폴더 생성: ~/.ai-todo-app/database
+  const appDataDir = path.join(homeDir, ".ai-todo-app", "database");
+
+  // 폴더 없으면 자동 생성
+  if (!fs.existsSync(appDataDir)) {
+    fs.mkdirSync(appDataDir, { recursive: true });
+  }
+
+  // 3. SQLite DB 파일 경로 설정
+  dbPath = path.join(appDataDir, "todo.db");
+
+  // 4. DB 연결 (파일 없으면 자동 생성)
+  sqlite = new Database(dbPath);
+
+  // 5. Drizzle ORM 인스턴스 생성
+  db = drizzle(sqlite);
+
+  // 확인용 콘솔 출력
+  console.log("[DB Ready] SQLite 경로:", dbPath);
 }
 
-// 3. SQLite DB 파일 경로 설정
-export const dbPath = path.join(appDataDir, "todo.db");
+// Getter 함수들
+export function getDb(): BetterSQLite3Database {
+  if (db === null) {
+    throw new Error("Database not initialized. Call initializeConnection() first.");
+  }
+  return db;
+}
 
-// 4. DB 연결 (파일 없으면 자동 생성)
-// drizzle 설정 및 외부에서 커넥션 종료를 할 수 있도록 export
-export const sqlite = new Database(dbPath);
+export function getSqlite(): Database.Database {
+  if (sqlite === null) {
+    throw new Error("Database not initialized. Call initializeConnection() first.");
+  }
+  return sqlite;
+}
 
-// 5. Drizzle ORM 인스턴스 생성
-export const db = drizzle(sqlite);
+export function getDbPath(): string {
+  if (dbPath === null) {
+    throw new Error("Database not initialized. Call initializeConnection() first.");
+  }
+  return dbPath;
+}
 
-// 확인용 콘솔 출력
-console.log("[DB Ready] SQLite 경로:", dbPath);
+// 하위 호환성을 위한 export (사용 시 주의)
+export { db, sqlite, dbPath };

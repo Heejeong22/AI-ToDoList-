@@ -1,13 +1,19 @@
-import { db, dbPath, sqlite } from './connection.js'
+import { initializeConnection, getDb, getSqlite, getDbPath } from './connection.js'
 
 // 데이터베이스 연결 종료 함수
 export function closeDatabase(): void {
-  sqlite.close()
+  getSqlite().close()
 }
 
 // 마이그레이션 및 초기화 함수
 export async function initializeDatabase(): Promise<void> {
   try {
+    // 먼저 DB 연결 초기화
+    initializeConnection()
+
+    const sqlite = getSqlite()
+    const dbPath = getDbPath()
+
     // todos 테이블이 없으면 생성 (단일 테이블 스키마)
     sqlite.exec(`
       CREATE TABLE IF NOT EXISTS todos (
@@ -33,6 +39,7 @@ export async function initializeDatabase(): Promise<void> {
     throw error
   }
 }
-// db 인스턴스를 기본/이름 export 모두 제공
-export { db }
-export default db
+
+// db getter 함수 제공
+export { getDb as db }
+export default getDb
