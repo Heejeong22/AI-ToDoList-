@@ -5,6 +5,7 @@ import { setupTodoHandlers } from './ipc/todoHandlers'
 import { setupAiHandlers } from './ipc/aiHandlers'
 import { setupAppHandlers } from './ipc/appHandlers'
 import * as Drizzle from './db/drizzle'
+import { runMigration } from './utils/migrate'
 
 
 // Keep a global reference of the window object
@@ -13,7 +14,10 @@ let mainWindow: BrowserWindow | null = null
 // This method will be called when Electron has finished initialization
 app.whenReady().then(async () => {
   try {
-    // Initialize database
+    // 1) 스키마 기반 자동 마이그레이션 적용
+    await runMigration()
+
+    // 2) DB 초기화
     await Drizzle.initializeDatabase()
 
     // Create the main window
