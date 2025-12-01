@@ -68,6 +68,9 @@ const api = {
 
     getAnalysisHistory: (todoId: number): Promise<ApiResponse> =>
       ipcRenderer.invoke('ai:getAnalysisHistory', todoId),
+
+    gptAnalyzeTodo: (text: string): Promise<ApiResponse> =>
+      ipcRenderer.invoke('gptAI:analyzeTodo', text),
   },
 
   // 앱 관련 API
