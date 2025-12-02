@@ -136,6 +136,29 @@ const api = {
     ipcRenderer.removeListener(channel, callback)
   },
 
+  // 단축키 이벤트 리스너 (cleanup 함수 반환)
+  onShortcut: (channel: string, callback: () => void) => {
+    const subscription = (_event: any) => callback()
+
+    // 허용된 채널만 리스닝
+    const allowedChannels = [
+      'new-todo',
+      'ai-analysis',
+      'search',
+      'quick-add',
+      'escape'
+    ]
+
+    if (allowedChannels.includes(channel)) {
+      ipcRenderer.on(`shortcut:${channel}`, subscription)
+    }
+
+    // Cleanup 함수 반환
+    return () => {
+      ipcRenderer.removeListener(`shortcut:${channel}`, subscription)
+    }
+  },
+
   // 일반적인 invoke (다른 API에서 처리되지 않은 경우)
   invoke: (channel: string, data?: any): Promise<any> => {
     return ipcRenderer.invoke(channel, data)
