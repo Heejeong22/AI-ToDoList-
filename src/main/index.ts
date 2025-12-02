@@ -5,7 +5,17 @@ import { setupTodoHandlers } from './ipc/todoHandlers'
 import { setupAiHandlers } from './ipc/aiHandlers'
 import { setupAppHandlers } from './ipc/appHandlers'
 import * as Drizzle from './db/drizzle'
+import { runMigration } from './utils/migrate'
+import { setupGptAiHandlers } from './ipc/gptAiHandlers'
 
+// 전역 타입 선언
+declare global {
+  namespace Electron {
+    interface App {
+      isQuitting?: boolean
+    }
+  }
+}
 
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null
@@ -13,7 +23,10 @@ let mainWindow: BrowserWindow | null = null
 // This method will be called when Electron has finished initialization
 app.whenReady().then(async () => {
   try {
-    // Initialize database
+    // 1) 스키마 기반 자동 마이그레이션 적용
+    await runMigration()
+
+    // 2) DB 초기화
     await Drizzle.initializeDatabase()
 
     // Create the main window
@@ -26,6 +39,7 @@ app.whenReady().then(async () => {
     setupTodoHandlers(ipcMain)
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
+    setupGptAiHandlers(ipcMain) 
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()
@@ -36,13 +50,28 @@ app.whenReady().then(async () => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWindow = createWindow()
+    } else if (mainWindow) {
+      // Dock 아이콘 클릭 시 창 표시 (macOS)
+      mainWindow.show()
     }
   })
 })
 
-// Quit when all windows are closed, except on macOS
+// before-quit 이벤트
+app.on('before-quit', () => {
+  app.isQuitting = true
+})
+
+// window-all-closed 이벤트 수정
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // macOS: 창 닫아도 앱은 계속 실행 (Dock에서 숨김)
+  // 완전 종료는 Cmd+Q나 메뉴에서만 가능
+  if (app.isQuitting) {
+    app.quit()
+  }
+  // Windows/Linux: 창 닫으면 앱 종료 (기본 동작)
+  // 나중에 트레이 추가 시 macOS와 동일하게 변경
+  else if (process.platform !== 'darwin') {
     app.quit()
   }
 })

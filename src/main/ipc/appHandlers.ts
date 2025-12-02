@@ -1,6 +1,5 @@
 import { IpcMain, app, dialog } from 'electron'
 import { db } from '../db/drizzle'
-import { userSettings, statistics } from '../db/schema'
 import { sql } from 'drizzle-orm'
 import os from 'os'
 
@@ -20,65 +19,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
     }
   })
 
-  // 사용자 설정 가져오기
-  ipcMain.handle('app:getSettings', async () => {
-    try {
-      const settings = await db.select().from(userSettings)
-      const settingsMap = settings.reduce((acc, setting) => {
-        acc[setting.key] = setting.value
-        return acc
-      }, {} as Record<string, string>)
-
-      return { success: true, data: settingsMap }
-    } catch (error) {
-      console.error('Error fetching settings:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
-
-  // 사용자 설정 저장
-  ipcMain.handle('app:setSetting', async (_, { key, value }) => {
-    try {
-      await db
-        .insert(userSettings)
-        .values({ key, value })
-        .onConflictDoUpdate({
-          target: userSettings.key,
-          set: { value, updatedAt: new Date() }
-        })
-
-      return { success: true }
-    } catch (error) {
-      console.error('Error saving setting:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
-
-  // 여러 설정 일괄 저장
-  ipcMain.handle('app:setSettings', async (_, settings) => {
-    try {
-      const updates = Object.entries(settings).map(([key, value]) => ({
-        key,
-        value: String(value),
-        updatedAt: new Date()
-      }))
-
-      for (const update of updates) {
-        await db
-          .insert(userSettings)
-          .values(update)
-          .onConflictDoUpdate({
-            target: userSettings.key,
-            set: { value: update.value, updatedAt: update.updatedAt }
-          })
-      }
-
-      return { success: true }
-    } catch (error) {
-      console.error('Error saving settings:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
+  // (단순 버전) 사용자 설정은 DB에 저장하지 않고, 이후 필요 시 확장
 
   // 앱 데이터 폴더 경로 가져오기
   ipcMain.handle('app:getAppDataPath', () => {
@@ -181,42 +122,7 @@ export function setupAppHandlers(ipcMain: IpcMain): void {
     app.exit(0)
   })
 
-  // 통계 데이터 저장
-  ipcMain.handle('app:saveStatistics', async (_, statsData) => {
-    try {
-      const result = await db
-        .insert(statistics)
-        .values(statsData)
-        .returning()
-
-      return { success: true, data: result[0] }
-    } catch (error) {
-      console.error('Error saving statistics:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
-
-  // 통계 데이터 가져오기
-  ipcMain.handle('app:getStatistics', async (_, { startDate, endDate }) => {
-    try {
-      let query = db.select().from(statistics)
-
-      if (startDate) {
-        query = query.where(sql`${statistics.date} >= ${startDate}`)
-      }
-
-      if (endDate) {
-        query = query.where(sql`${statistics.date} <= ${endDate}`)
-      }
-
-      const result = await query.orderBy(statistics.date)
-
-      return { success: true, data: result }
-    } catch (error) {
-      console.error('Error fetching statistics:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    }
-  })
+  // (단순 버전) 통계 데이터는 DB에 저장하지 않고, 이후 필요 시 확장
 
   // 앱 종료
   ipcMain.handle('app:quit', () => {
