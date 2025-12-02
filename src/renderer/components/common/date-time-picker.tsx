@@ -59,26 +59,30 @@ export default function DateTimePicker({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-lg shadow-xl w-80 max-h-[80vh] overflow-hidden">
+      <div className="bg-bg-card rounded-lg shadow-2xl w-80 max-h-[80vh] overflow-hidden border-2 border-border">
         {/* header */}
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="text-base font-semibold text-gray-800">날짜 및 시간 설정</h3>
+        <div className="px-4 py-3 border-b-2 border-border bg-bg-primary">
+          <h3 className="text-base font-bold text-text-primary">
+            날짜 및 시간 설정
+          </h3>
         </div>
 
         {/* 내용 */}
         <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
           {/* 빠른 선택 */}
           <div>
-            <label className="text-xs font-medium text-gray-600 mb-2 block">빠른 선택</label>
+            <label className="text-xs font-bold text-text-primary mb-2 block">
+              빠른 선택
+            </label>
             <div className="grid grid-cols-4 gap-2">
               {quickOptions.map(option => (
                 <button
                   key={option.label}
                   onClick={() => setQuickDate(option.getDays())}
-                  className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                  className="px-3 py-2 text-xs border-2 border-border rounded hover:bg-bg-hover transition-colors text-text-primary font-semibold"
                 >
                   {option.label}
                 </button>
@@ -88,12 +92,14 @@ export default function DateTimePicker({
 
           {/* 날짜 선택 */}
           <div>
-            <label className="text-xs font-medium text-gray-600 mb-2 block">날짜</label>
+            <label className="text-xs font-bold text-text-primary mb-2 block">
+              날짜
+            </label>
             <input
               type="date"
               value={formatDate(selectedDate)}
               onChange={(e) => setSelectedDate(new Date(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-3 py-2 border-2 border-input-border rounded focus:outline-none focus:ring-2 focus:ring-accent text-sm bg-bg-card text-text-primary font-medium"
             />
           </div>
 
@@ -109,9 +115,9 @@ export default function DateTimePicker({
                   setSelectedTime('09:00');
                 }
               }}
-              className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-4 h-4 accent-accent rounded focus:ring-2 focus:ring-accent"
             />
-            <label htmlFor="includeTime" className="text-sm text-gray-700 cursor-pointer">
+            <label htmlFor="includeTime" className="text-sm text-text-primary cursor-pointer font-medium">
               시간 포함
             </label>
           </div>
@@ -119,11 +125,13 @@ export default function DateTimePicker({
           {/* 시간 선택 */}
           {includeTime && (
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-2 block">시간</label>
+              <label className="text-xs font-bold text-text-primary mb-2 block">
+                시간
+              </label>
               <select
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 border-2 border-input-border rounded focus:outline-none focus:ring-2 focus:ring-accent text-sm bg-bg-card text-text-primary font-medium"
               >
                 {timeOptions.map(time => {
                   const [hour, minute] = time.split(':').map(Number);
@@ -144,9 +152,11 @@ export default function DateTimePicker({
           )}
 
           {/* 미리보기 */}
-          <div className="bg-gray-50 rounded p-3">
-            <div className="text-xs text-gray-500 mb-1">선택된 일정</div>
-            <div className="text-sm font-medium text-gray-800">
+          <div className="bg-bg-hover rounded p-3 border-2 border-border">
+            <div className="text-xs text-text-secondary mb-1 font-semibold">
+              선택된 일정
+            </div>
+            <div className="text-sm font-bold text-text-primary">
               {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
               {includeTime && selectedTime && (
                 <>
@@ -165,17 +175,17 @@ export default function DateTimePicker({
           </div>
         </div>
 
-        {/* putter */}
-        <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+        {/* footer */}
+        <div className="px-4 py-3 border-t-2 border-border bg-bg-primary flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+            className="px-4 py-2 text-sm bg-bg-hover text-text-primary rounded hover:bg-bg-secondary transition-colors font-semibold border border-border"
           >
             취소
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 text-sm bg-accent text-bg-card rounded hover:bg-text-secondary transition-colors font-bold"
           >
             확인
           </button>

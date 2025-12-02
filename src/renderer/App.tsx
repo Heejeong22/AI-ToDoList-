@@ -43,16 +43,15 @@ export default function App() {
   }, []);
 
   return (
-    <div className="fixed top-0 right-0 h-screen w-1/4 min-w-[400px] shadow-2xl">
+    <div className="w-full h-screen bg-bg-primary">
       {showTodoForm && (
-        <div className="absolute top-4 right-4 z-50 p-4 bg-blue-100 rounded-lg shadow-lg">
-          <p className="text-blue-800 font-semibold">
+        <div className="absolute top-4 right-4 z-50 p-4 bg-bg-secondary rounded-lg shadow-lg border-2 border-border">
+          <p className="text-text-primary font-semibold">
             ✅ 단축키로 Todo 폼 토글됨! (Cmd/Ctrl+Shift+T)
           </p>
         </div>
       )}
       <TodoList />
-
     </div>
   );
 }
