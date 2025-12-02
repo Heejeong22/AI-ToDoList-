@@ -6,6 +6,7 @@ import { setupAiHandlers } from './ipc/aiHandlers'
 import { setupAppHandlers } from './ipc/appHandlers'
 import * as Drizzle from './db/drizzle'
 import { runMigration } from './utils/migrate'
+import { setupGptAiHandlers } from './ipc/gptAiHandlers'
 
 // 전역 타입 선언
 declare global {
@@ -38,6 +39,7 @@ app.whenReady().then(async () => {
     setupTodoHandlers(ipcMain)
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
+    setupGptAiHandlers(ipcMain) 
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()

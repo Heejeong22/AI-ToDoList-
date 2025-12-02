@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import TodoList from './components/todo-list';
 
+
+declare global {
+  interface Window {
+    api: typeof window.api;
+  }
+}
+
 export default function App() {
   const [showTodoForm, setShowTodoForm] = useState(false);
 
@@ -45,6 +52,7 @@ export default function App() {
         </div>
       )}
       <TodoList />
+
     </div>
   );
 }
