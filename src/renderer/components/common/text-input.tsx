@@ -63,7 +63,8 @@ export default function TextInput({
 
   return (
     <>
-      <div className="bg-bg-card rounded-lg border-2 border-border">
+      <div className="space-y-3">
+        {/* 입력창 */}
         <textarea
           value={inputValue}
           onChange={handleChange}
@@ -71,15 +72,16 @@ export default function TextInput({
           placeholder={placeholder}
           rows={rows}
           maxLength={maxLength}
-          className="w-full p-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-accent transition-all text-base bg-bg-card text-text-primary font-medium border-0"
+          className="w-full p-3 rounded-lg resize-none focus:outline-none transition-all text-base bg-bg-card text-text-primary font-medium border-2 border-border"
         />
         
-        <div className="flex justify-between items-center px-3 pb-3">
+        {/* 하단 버튼들 */}
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {/* 시간 설정 버튼 */}
             <button
               onClick={() => setIsPickerOpen(true)}
-              className="px-3 py-2 text-sm bg-bg-hover text-text-primary rounded hover:bg-bg-secondary transition-colors flex items-center gap-1.5 font-medium border border-border"
+              className="px-3 py-2 text-sm bg-bg-card text-text-primary rounded hover:bg-bg-secondary transition-colors flex items-center gap-1.5 font-medium border border-border"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
