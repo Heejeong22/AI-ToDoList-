@@ -1,52 +1,164 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TextInput from './common/text-input';
 import CategorySection from './category-section';
 import { CATEGORIES } from './constants';
-import { MOCK_TODOS } from './mock-data';
 import { Todo } from './types';
 import { getToday, getDateDisplayText, isSameDay } from './utils/date-utils';
 
 export default function TodoList() {
-  const [todos, setTodos] = useState<Todo[]>(MOCK_TODOS);
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(getToday());
 
-  // TODO 추가 핸들러
-  const handleAddTodo = (text: string, dueDate: Date, dueTime?: string) => {
-    const newTodo: Todo = {
-      id: Date.now(),
-      text: text,
-      category: 'etc', // 기본값 (나중에 AI가 분류)
-      completed: false,
-      isPinned: false,
-      dueDate: dueDate,
-      dueTime: dueTime,
-      createdAt: new Date()
+  // DB Todo → UI Todo 매핑
+  const mapDbTodoToUiTodo = (dbTodo: any): Todo => {
+    const toDate = (value: any): Date => {
+      if (value == null) return getToday();
+      if (value instanceof Date) return value;
+      if (typeof value === 'number') {
+        // SQLite 정수(UNIX 초) → Date
+        return new Date(value * 1000);
+      }
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) return parsed;
+      return getToday();
     };
-    setTodos([...todos, newTodo]);
+
+    const dueDate = toDate(dbTodo.dueDate ?? dbTodo.due_date);
+    const createdAt = toDate(dbTodo.createdAt ?? dbTodo.created_at);
+
+    const toTimeString = (date: Date | null): string | undefined => {
+      if (!date) return undefined;
+      const h = date.getHours().toString().padStart(2, '0');
+      const m = date.getMinutes().toString().padStart(2, '0');
+      if (h === '00' && m === '00') return undefined;
+      return `${h}:${m}`;
+    };
+
+    return {
+      id: dbTodo.id,
+      text: dbTodo.title ?? dbTodo.text ?? '',
+      category: dbTodo.category ?? 'etc',
+      completed: Boolean(dbTodo.completed),
+      isPinned: Boolean(dbTodo.pinned),
+      dueDate,
+      dueTime: toTimeString(dueDate),
+      createdAt,
+    };
   };
 
-  // 완료 상태 토글
-  const toggleComplete = (id: number) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+  // 마운트 시 DB에서 Todo 불러오기
+  useEffect(() => {
+    const loadTodos = async () => {
+      try {
+        const response = await window.api.todo.getAll();
+        if (response.success && response.data) {
+          const mapped = response.data.map((t: any) => mapDbTodoToUiTodo(t));
+          setTodos(mapped);
+        } else {
+          console.error('Failed to load todos:', response.error);
+        }
+      } catch (error) {
+        console.error('Error loading todos from DB:', error);
+      }
+    };
+
+    loadTodos();
+  }, []);
+
+  // TODO 추가 핸들러 (DB + AI 카테고리)
+  const handleAddTodo = async (text: string, dueDate: Date, dueTime?: string) => {
+    try {
+      const fullDueDate = new Date(dueDate);
+      if (dueTime) {
+        const [h, m] = dueTime.split(':').map(Number);
+        if (!Number.isNaN(h) && !Number.isNaN(m)) {
+          fullDueDate.setHours(h, m, 0, 0);
+        }
+      }
+
+      const response = await window.api.todo.create({
+        title: text,
+        dueDate: fullDueDate,
+      } as any);
+
+      if (!response.success || !response.data) {
+        console.error('Failed to create todo:', response.error);
+        alert('할 일 저장에 실패했습니다.');
+        return;
+      }
+
+      const created = mapDbTodoToUiTodo(response.data);
+      setTodos(prev => [...prev, created]);
+    } catch (error) {
+      console.error('Error creating todo:', error);
+      alert('할 일 저장 중 오류가 발생했습니다.');
+    }
   };
 
-  // 고정 핀 토글
-  const togglePin = (id: number) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, isPinned: !todo.isPinned } : todo
-    ));
+  // 완료 상태 토글 (DB 반영)
+  const toggleComplete = async (id: number) => {
+    try {
+      const response = await window.api.todo.toggleComplete(id);
+      if (!response.success || !response.data) {
+        console.error('Failed to toggle complete:', response.error);
+        return;
+      }
+
+      const updated = mapDbTodoToUiTodo(response.data);
+      setTodos(prev =>
+        prev.map(todo => (todo.id === id ? updated : todo)),
+      );
+    } catch (error) {
+      console.error('Error toggling complete:', error);
+    }
   };
 
-  // TODO 삭제
-  const deleteTodo = (id: number) => {
+  // 고정 핀 토글 (DB 반영)
+  const togglePin = async (id: number) => {
+    try {
+      const target = todos.find(t => t.id === id);
+      if (!target) return;
+
+      const response = await window.api.todo.update(id, {
+        pinned: !target.isPinned,
+      } as any);
+
+      if (!response.success || !response.data) {
+        console.error('Failed to toggle pin:', response.error);
+        return;
+      }
+
+      const updated = mapDbTodoToUiTodo(response.data);
+      setTodos(prev =>
+        prev.map(todo => (todo.id === id ? updated : todo)),
+      );
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+    }
+  };
+
+  // TODO 삭제 (DB 반영)
+  const deleteTodo = async (id: number) => {
     const todoToDelete = todos.find(todo => todo.id === id);
     if (!todoToDelete) return;
 
     const confirmMessage = `"${todoToDelete.text}"을(를) 삭제하시겠습니까?`;
-    if (window.confirm(confirmMessage)) {
-      setTodos(todos.filter(todo => todo.id !== id));
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const response = await window.api.todo.delete(id);
+      if (!response.success) {
+        console.error('Failed to delete todo:', response.error);
+        alert('삭제에 실패했습니다.');
+        return;
+      }
+
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
