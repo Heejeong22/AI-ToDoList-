@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, app } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -35,9 +35,25 @@ export function createWindow(): BrowserWindow {
     mainWindow.show()
   })
 
-  // Handle window closed
-  mainWindow.on('closed', () => {
-    // Dereference the window object
+  // OS별 창 관리 로직
+  // macOS: X 버튼 클릭 시 hide (종료 안 함)
+  mainWindow.on('close', (event) => {
+    if (process.platform === 'darwin' && !app.isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+      if (app.dock) {
+        app.dock.hide()
+      }
+    }
+    // Windows/Linux: 기본 동작 유지 (종료됨)
+    // 나중에 트레이 구현 시 수정 예정
+  })
+
+  // macOS Dock 관리
+  mainWindow.on('show', () => {
+    if (process.platform === 'darwin' && app.dock) {
+      app.dock.show()
+    }
   })
 
   return mainWindow
