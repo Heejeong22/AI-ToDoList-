@@ -1,12 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { createWindow } from './windows'
 import { registerShortcuts } from './shortcuts'
-import { setupTodoHandlers } from './ipc/todoHandlers'
-import { setupAiHandlers } from './ipc/aiHandlers'
-import { setupAppHandlers } from './ipc/appHandlers'
+import { setupTodoHandlers } from './ipc/todo/todoHandlers'
+import { setupAiHandlers } from './ipc/ai/aiHandlers'
+import { setupAppHandlers } from './ipc/app/appHandlers'
 import * as Drizzle from './db/drizzle'
 import { runMigration } from './utils/migrate'
-import { setupGptAiHandlers } from './ipc/gptAiHandlers'
+import { setupGptAiHandlers } from './ipc/gpt/gptAiHandlers'
 
 // 전역 타입 선언
 declare global {
