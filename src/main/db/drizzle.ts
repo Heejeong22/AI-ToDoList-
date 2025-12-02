@@ -20,12 +20,12 @@ export async function initializeDatabase(): Promise<void> {
         category TEXT,
         priority INTEGER,
         tags TEXT,
-        alert_time INTEGER,
-        due_date INTEGER,
+        alert_time TEXT,
+        due_date TEXT,
         completed INTEGER DEFAULT 0,
         pinned INTEGER DEFAULT 0,
-        created_at INTEGER DEFAULT (strftime('%s','now')),
-        updated_at INTEGER,
+        created_at TEXT DEFAULT (strftime('%Y-%m-%d %H:%M','now','localtime')),
+        updated_at TEXT,
         deleted_at INTEGER
       );
     `)
