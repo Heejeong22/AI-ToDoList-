@@ -22,14 +22,22 @@ export default function TodoList() {
       if (value == null) return getToday();
       if (value instanceof Date) return value;
       if (typeof value === 'number') {
-        // SQLite 정수(UNIX 초) → Date
+        // (과거 버전 호환) SQLite 정수(UNIX 초) → Date
         return new Date(value * 1000);
+      }
+      const str = String(value);
+      // "YYYY-MM-DD HH:MM" 형태를 안전하게 파싱
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(str)) {
+        const iso = str.replace(' ', 'T');
+        const parsed = new Date(iso);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
       }
       const parsed = new Date(value);
       if (!Number.isNaN(parsed.getTime())) return parsed;
       return getToday();
     };
 
+    // DB에 저장된 due_date(문자열)를 그대로 사용자가 설정한 마감 시간으로 사용
     const dueDate = toDate(dbTodo.dueDate ?? dbTodo.due_date);
     const createdAt = toDate(dbTodo.createdAt ?? dbTodo.created_at);
 
@@ -172,10 +180,27 @@ export default function TodoList() {
     }
   };
 
-  const editTodo = (id: number, newText: string) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, text: newText } : todo
-    ));
+  // TODO 텍스트 수정 (DB 반영)
+  const editTodo = async (id: number, newText: string) => {
+    try {
+      const response = await window.api.todo.update(id, {
+        title: newText,
+      } as any);
+
+      if (!response.success || !response.data) {
+        console.error('Failed to edit todo:', response.error);
+        alert('수정에 실패했습니다.');
+        return;
+      }
+
+      const updated = mapDbTodoToUiTodo(response.data);
+      setTodos(prev =>
+        prev.map(todo => (todo.id === id ? updated : todo)),
+      );
+    } catch (error) {
+      console.error('Error editing todo:', error);
+      alert('수정 중 오류가 발생했습니다.');
+    }
   };
 
   // 개별 카테고리 토글
