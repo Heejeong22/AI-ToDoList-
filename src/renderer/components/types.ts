@@ -30,7 +30,7 @@ export interface TodoItemProps {
   onToggleComplete: (id: number) => void;
   onTogglePin: (id: number) => void;
   onDelete: (id: number) => void;
-  onEdit?: (id: number) => void;
+  onEdit?: (id: number, newText: string) => void;
 }
 
 export interface CategorySectionProps {
@@ -41,6 +41,11 @@ export interface CategorySectionProps {
   onToggleComplete: (id: number) => void;
   onTogglePin: (id: number) => void;
   onDelete: (id: number) => void;
+  onEdit: (id: number, newText: string) => void;
+  onAddTodo?: (text: string, dueTime?: string) => void;
+  selectedDate: Date;
+  isExpanded: boolean;
+  onToggleExpand: (categoryValue: string) => void;
 }
 
 export interface TextInputProps {

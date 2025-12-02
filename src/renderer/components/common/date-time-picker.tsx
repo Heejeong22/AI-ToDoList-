@@ -33,7 +33,6 @@ export default function DateTimePicker({
     }
   };
 
-  // 빠른 선택 옵션
   const quickOptions = [
     { label: '오늘', getDays: () => 0 },
     { label: '내일', getDays: () => 1 },
@@ -47,7 +46,6 @@ export default function DateTimePicker({
     setSelectedDate(newDate);
   };
 
-  // 시간 옵션 생성 (30분 단위)
   const timeOptions: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
     for (let minute of [0, 30]) {
@@ -59,26 +57,52 @@ export default function DateTimePicker({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-lg shadow-xl w-80 max-h-[80vh] overflow-hidden">
+      <div 
+        className="rounded-lg shadow-2xl w-80 max-h-[80vh] overflow-hidden"
+        style={{ 
+          backgroundColor: '#FEFDFB',
+          border: '2px solid #E5DCC8'
+        }}
+      >
         {/* header */}
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="text-base font-semibold text-gray-800">날짜 및 시간 설정</h3>
+        <div 
+          className="px-4 py-3"
+          style={{ 
+            borderBottom: '2px solid #E5DCC8',
+            backgroundColor: '#F2E8D5'
+          }}
+        >
+          <h3 className="text-base font-bold" style={{ color: '#010D00' }}>
+            날짜 및 시간 설정
+          </h3>
         </div>
 
         {/* 내용 */}
-        <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+        <div 
+          className="p-4 space-y-4 max-h-[60vh] overflow-y-auto"
+          style={{ backgroundColor: '#FEFDFB' }}
+        >
           {/* 빠른 선택 */}
           <div>
-            <label className="text-xs font-medium text-gray-600 mb-2 block">빠른 선택</label>
+            <label className="text-xs font-bold mb-2 block" style={{ color: '#010D00' }}>
+              빠른 선택
+            </label>
             <div className="grid grid-cols-4 gap-2">
               {quickOptions.map(option => (
                 <button
                   key={option.label}
                   onClick={() => setQuickDate(option.getDays())}
-                  className="px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                  className="px-3 py-2 text-xs rounded transition-colors font-semibold"
+                  style={{
+                    border: '2px solid #E5DCC8',
+                    backgroundColor: '#F2E8D5',
+                    color: '#010D00'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
                 >
                   {option.label}
                 </button>
@@ -88,12 +112,21 @@ export default function DateTimePicker({
 
           {/* 날짜 선택 */}
           <div>
-            <label className="text-xs font-medium text-gray-600 mb-2 block">날짜</label>
+            <label className="text-xs font-bold mb-2 block" style={{ color: '#010D00' }}>
+              날짜
+            </label>
             <input
               type="date"
               value={formatDate(selectedDate)}
               onChange={(e) => setSelectedDate(new Date(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-3 py-2 rounded focus:outline-none text-sm font-medium"
+              style={{
+                border: '2px solid #E5DCC8',
+                backgroundColor: '#F2E8D5',
+                color: '#010D00'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
             />
           </div>
 
@@ -109,9 +142,14 @@ export default function DateTimePicker({
                   setSelectedTime('09:00');
                 }
               }}
-              className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-4 h-4 rounded focus:ring-2"
+              style={{ accentColor: '#5D4E3E' }}
             />
-            <label htmlFor="includeTime" className="text-sm text-gray-700 cursor-pointer">
+            <label 
+              htmlFor="includeTime" 
+              className="text-sm cursor-pointer font-medium"
+              style={{ color: '#010D00' }}
+            >
               시간 포함
             </label>
           </div>
@@ -119,11 +157,20 @@ export default function DateTimePicker({
           {/* 시간 선택 */}
           {includeTime && (
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-2 block">시간</label>
+              <label className="text-xs font-bold mb-2 block" style={{ color: '#010D00' }}>
+                시간
+              </label>
               <select
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 rounded focus:outline-none text-sm font-medium"
+                style={{
+                  border: '2px solid #E5DCC8',
+                  backgroundColor: '#F2E8D5',
+                  color: '#010D00'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
               >
                 {timeOptions.map(time => {
                   const [hour, minute] = time.split(':').map(Number);
@@ -142,40 +189,38 @@ export default function DateTimePicker({
               </select>
             </div>
           )}
-
-          {/* 미리보기 */}
-          <div className="bg-gray-50 rounded p-3">
-            <div className="text-xs text-gray-500 mb-1">선택된 일정</div>
-            <div className="text-sm font-medium text-gray-800">
-              {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
-              {includeTime && selectedTime && (
-                <>
-                  {' • '}
-                  {(() => {
-                    const [hour, minute] = selectedTime.split(':').map(Number);
-                    const period = hour < 12 ? '오전' : '오후';
-                    const displayHour = hour % 12 || 12;
-                    return minute === 0 
-                      ? `${period} ${displayHour}시`
-                      : `${period} ${displayHour}시 ${minute}분`;
-                  })()}
-                </>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* putter */}
-        <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+        {/* footer */}
+        <div 
+          className="px-4 py-3 flex justify-end gap-2"
+          style={{
+            borderTop: '2px solid #E5DCC8',
+            backgroundColor: '#F2E8D5'
+          }}
+        >
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+            className="px-4 py-2 text-sm rounded transition-colors font-semibold"
+            style={{
+              backgroundColor: '#E5DCC8',
+              color: '#010D00',
+              border: '1px solid #E5DCC8'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5D4E3E'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
           >
             취소
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 text-sm rounded transition-colors font-bold"
+            style={{
+              backgroundColor: '#5D4E3E',
+              color: '#FEFDFB'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A3F35'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5D4E3E'}
           >
             확인
           </button>
