@@ -21,6 +21,15 @@ export function registerShortcuts(mainWindow: BrowserWindow): void {
     mainWindow.webContents.send('shortcut:quick-add')
   })
 
+  // Ctrl+Alt+H: 창 숨기기/보이기 토글
+  globalShortcut.register('CommandOrControl+Alt+H', () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide()
+    } else {
+      mainWindow.show()
+    }
+  })
+
   // F12: 개발자 도구 토글 (개발 모드에서만)
   if (process.env.NODE_ENV === 'development') {
     globalShortcut.register('F12', () => {
