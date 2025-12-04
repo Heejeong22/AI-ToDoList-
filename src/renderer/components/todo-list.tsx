@@ -11,6 +11,7 @@ import { useTodoState } from './hooks/use-todo-state';
 import { useTodoActions } from './hooks/use-todo-actions';
 import { useTodoFilters } from './hooks/use-todo-filters';
 import { useModals } from './hooks/use-modals';
+import { safeParseJSON } from '../../main/parser'; 
 
 export default function TodoList() {
   // 커스텀 훅으로 상태 관리 분리
@@ -201,7 +202,36 @@ export default function TodoList() {
             placeholder="할 일을 입력하세요..."
             maxLength={100}
             rows={1}
-            onSubmit={(text, dueDate, dueTime) => addTodo(text, dueDate, dueTime)}
+            onSubmit={async (text) => {
+              try {
+                setIsLoading(true);
+
+                // 1) GPT 호출
+                const response = await window.api.ai.gptAnalyzeTodo(text);
+
+                if (!response.success || !response.data) {
+                  showAlert("AI 분석 실패", "할 일을 분석할 수 없습니다.");
+                  return;
+                }
+
+                // 2) GPT JSON 파싱
+                const parsed = safeParseJSON(response.data);
+
+                if (!parsed) {
+                  showAlert("JSON 파싱 실패", "AI가 잘못된 JSON을 반환했습니다.");
+                  return;
+                }
+
+                // 3) addTodo에 전체 객체 넘기기
+                addTodo(parsed);
+
+              } catch (err) {
+                console.error(err);
+                showAlert("오류", "AI 분석 중 문제가 발생했습니다.");
+              } finally {
+                setIsLoading(false);
+              }
+            }}
             defaultDate={selectedDate}
           />
         </div>
