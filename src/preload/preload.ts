@@ -1,4 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { CreateTodoInput } from 'src/main/ipc/todo/createTodoHandlers';
+
 
 // Type definitions for the exposed API
 interface Todo {
@@ -27,7 +29,7 @@ const api = {
     getAll: (): Promise<ApiResponse<Todo[]>> =>
       ipcRenderer.invoke('todo:getAll'),
 
-    create: (todo: Todo): Promise<ApiResponse<Todo>> =>
+    create: (todo: CreateTodoInput): Promise<ApiResponse<any>> =>
       ipcRenderer.invoke('todo:create', todo),
 
     update: (id: number, updates: Partial<Todo>): Promise<ApiResponse<Todo>> =>
