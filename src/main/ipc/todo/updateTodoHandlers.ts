@@ -64,10 +64,13 @@ export async function toggleCompleteTodo(id: number) {
     throw new Error('Todo not found')
   }
 
+  // 불리언을 0/1 정수로 변환 (SQLite는 정수만 지원)
+  const newCompletedValue = currentTodo[0].completed ? 0 : 1
+
   const result = await db
     .update(todos)
     .set({
-      completed: !currentTodo[0].completed,
+      completed: newCompletedValue,
       updatedAt: toYmdHm(new Date()),
     })
     .where(eq(todos.id, id))
@@ -75,5 +78,3 @@ export async function toggleCompleteTodo(id: number) {
 
   return result[0]
 }
-
-
