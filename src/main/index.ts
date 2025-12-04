@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { createWindow } from './windows'
 import { registerShortcuts } from './shortcuts'
+import { createTray } from './tray'
 import { setupTodoHandlers } from './ipc/todo/todoHandlers'
 import { setupAiHandlers } from './ipc/ai/aiHandlers'
 import { setupAppHandlers } from './ipc/app/appHandlers'
@@ -32,6 +33,9 @@ app.whenReady().then(async () => {
     // Create the main window
     mainWindow = createWindow()
 
+    // Create system tray
+    createTray(mainWindow)
+
     // Register global shortcuts
     registerShortcuts(mainWindow)
 
@@ -39,7 +43,7 @@ app.whenReady().then(async () => {
     setupTodoHandlers(ipcMain)
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
-    setupGptAiHandlers(ipcMain) 
+    setupGptAiHandlers(ipcMain)
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()
@@ -64,16 +68,13 @@ app.on('before-quit', () => {
 
 // window-all-closed 이벤트 수정
 app.on('window-all-closed', () => {
-  // macOS: 창 닫아도 앱은 계속 실행 (Dock에서 숨김)
-  // 완전 종료는 Cmd+Q나 메뉴에서만 가능
+  // 트레이가 있으므로 창이 모두 닫혀도 앱은 계속 실행
+  // macOS, Windows, Linux 모두 트레이에서 실행 유지
+  // 완전 종료는 트레이 메뉴에서 "종료" 선택 시에만
   if (app.isQuitting) {
     app.quit()
   }
-  // Windows/Linux: 창 닫으면 앱 종료 (기본 동작)
-  // 나중에 트레이 추가 시 macOS와 동일하게 변경
-  else if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // 트레이가 있으므로 창 없이도 백그라운드에서 실행
 })
 
 // Security: Prevent new window creation
