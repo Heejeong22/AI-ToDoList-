@@ -1,7 +1,7 @@
-import { useState, useRef, KeyboardEvent, ChangeEvent } from 'react';
+import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from 'react';
 import DateTimePicker from './date-time-picker';
 import AlertModal from './alert-modal';
-import { getDateDisplayText, getTimeDisplayText } from '../utils/date-utils';
+import { getDateDisplayText, getTimeDisplayText, isSameDay } from '../utils/date-utils';
 
 interface TextInputProps {
   placeholder?: string;
@@ -23,7 +23,14 @@ export default function TextInput({
   const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [showAlert, setShowAlert] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!isSameDay(selectedDate, defaultDate)) {
+      setSelectedDate(defaultDate);
+    }
+  }, [defaultDate, selectedDate]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -33,23 +40,39 @@ export default function TextInput({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // 한글/일본어/중국어 등 IME 조합 중일 때는 무시
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedValue = inputValue.trim();
-    
+
     if (trimmedValue === '') {
       setShowAlert(true);
       return;
     }
 
-    onSubmit(trimmedValue, selectedDate, selectedTime);
-    setInputValue('');
-    textareaRef.current?.focus();
+    // 이미 submit 중이면 무시
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(trimmedValue, selectedDate, selectedTime);
+      setInputValue('');
+      textareaRef.current?.focus();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleAlertClose = () => {
@@ -119,9 +142,15 @@ export default function TextInput({
             </span>
             <button
               onClick={handleSubmit}
-              className="px-5 py-2 bg-accent text-bg-card text-base rounded-lg hover:bg-text-secondary transition-colors font-bold"
+              disabled={isSubmitting}
+              className={`px-5 py-2 text-base rounded-lg transition-colors font-bold ${
+                isSubmitting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-accent hover:bg-text-secondary'
+              }`}
+              style={{ color: '#FEFDFB' }}
             >
-              추가
+              {isSubmitting ? '추가 중...' : '추가'}
             </button>
           </div>
         </div>

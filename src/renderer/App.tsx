@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TodoList from './components/todo-list';
 import { useShortcuts } from './components/hooks/use-shortcuts';
 
@@ -10,6 +10,18 @@ declare global {
 
 export default function App() {
   const [showTodoForm, setShowTodoForm] = useState(false);
+
+  useEffect(() => {
+    const handleLog = (message: string) => {
+      console.log(`[알림 로그] ${message}`);
+    };
+
+    window.api.on('notification:log', handleLog);
+
+    return () => {
+      window.api.removeListener('notification:log', handleLog);
+    };
+  }, []);
 
   // 단축키 관리 (커스텀 훅으로 분리)
   useShortcuts({

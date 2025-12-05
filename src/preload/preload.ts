@@ -117,6 +117,18 @@ const api = {
       ipcRenderer.invoke('app:quit'),
   },
 
+  // 알림 관련 API
+  notification: {
+    test: (message?: string): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:test', message),
+
+    checkNow: (): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:checkNow'),
+
+    resetNotified: (todoId: number): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:resetNotified', todoId),
+  },
+
   // 이벤트 리스너
   on: (channel: string, callback: (...args: any[]) => void) => {
     // 허용된 채널만 리스닝 가능
@@ -125,7 +137,9 @@ const api = {
       'shortcut:ai-analysis',
       'shortcut:search',
       'shortcut:quick-add',
-      'shortcut:escape'
+      'shortcut:escape',
+      'notification:clicked',
+      'notification:log'
     ]
 
     if (allowedChannels.includes(channel)) {

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron'
+import { app, BrowserWindow, Menu, Tray, nativeImage, Notification } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -75,6 +75,16 @@ export function createTray(mainWindow: BrowserWindow): Tray {
             click: () => {
                 mainWindow.show()
                 mainWindow.webContents.send('shortcut:settings')
+            },
+        },
+        {
+            label: '알림 테스트',
+            click: () => {
+                const notification = new Notification({
+                    title: 'AI TodoList',
+                    body: '알림 기능이 정상 작동합니다.',
+                })
+                notification.show()
             },
         },
         { type: 'separator' },

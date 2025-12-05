@@ -101,14 +101,16 @@ export function useTodoFilters({ todos, selectedDate }: UseTodoFiltersProps) {
   const getTodosByCategory = (category: string) => {
     const filtered = getFilteredTodos();
 
-    // 1) DB/AI가 직접 분류한 category
-    // 2) 텍스트에서 키워드로 추론한 카테고리
-    const categoryTodos: Todo[] = filtered.filter(todo => {
-      if (todo.category === category) return true;
 
-      const inferred = inferCategoryFromText(todo.text);
-      return inferred === category;
-    });
+    let categoryTodos: Todo[];
+    if (category === 'schedule') {
+      // 스케줄: 시간이 설정된 todo만
+      categoryTodos = filtered.filter(todo => todo.dueTime);
+    } else {
+      // 다른 카테고리: 해당 카테고리인 todo (시간 있어도 표시)
+      categoryTodos = filtered.filter(todo => todo.category === category);
+    }
+
     
     // 정렬: 고정 → 시간순
     return categoryTodos.sort((a, b) => {

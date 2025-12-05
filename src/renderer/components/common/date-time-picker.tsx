@@ -21,8 +21,8 @@ export default function DateTimePicker({
   
   // 시간을 AM/PM과 시:분으로 분리
   const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
-  const [hour, setHour] = useState<string>('9');
-  const [minute, setMinute] = useState<string>('00');
+  const [hour, setHour] = useState<string>('');
+  const [minute, setMinute] = useState<string>('');
 
   // initialTime이 있으면 파싱
   useEffect(() => {
@@ -31,6 +31,9 @@ export default function DateTimePicker({
       setPeriod(h >= 12 ? 'PM' : 'AM');
       setHour(String(h % 12 || 12));
       setMinute(String(m).padStart(2, '0'));
+    } else {
+      setHour('');
+      setMinute('');
     }
   }, [initialTime]);
 
@@ -39,13 +42,21 @@ export default function DateTimePicker({
   const handleConfirm = () => {
     if (includeTime) {
       // AM/PM과 시:분을 24시간 형식으로 변환
-      let hour24 = parseInt(hour);
+      let hourValue = parseInt(hour, 10);
+      if (Number.isNaN(hourValue) || hourValue < 1 || hourValue > 12) {
+        hourValue = 9;
+      }
+      let hour24 = hourValue;
       if (period === 'PM' && hour24 !== 12) {
         hour24 += 12;
       } else if (period === 'AM' && hour24 === 12) {
         hour24 = 0;
       }
-      const timeString = `${String(hour24).padStart(2, '0')}:${minute}`;
+      let minuteValue = parseInt(minute, 10);
+      if (Number.isNaN(minuteValue) || minuteValue < 0 || minuteValue > 59) {
+        minuteValue = 0;
+      }
+      const timeString = `${String(hour24).padStart(2, '0')}:${String(minuteValue).padStart(2, '0')}`;
       onConfirm(selectedDate, timeString);
     } else {
       onConfirm(selectedDate, undefined);
@@ -73,26 +84,26 @@ export default function DateTimePicker({
   };
 
   const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
+    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
     if (value === '') {
       setHour('');
       return;
     }
-    const num = parseInt(value);
+    const num = parseInt(value, 10);
     if (num >= 1 && num <= 12) {
-      setHour(String(num));
+      setHour(value);
     }
   };
 
   const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
+    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
     if (value === '') {
       setMinute('');
       return;
     }
-    const num = parseInt(value);
+    const num = parseInt(value, 10);
     if (num >= 0 && num <= 59) {
-      setMinute(String(num).padStart(2, '0'));
+      setMinute(value);
     }
   };
 
@@ -229,6 +240,7 @@ export default function DateTimePicker({
                     color: '#010D00',
                     width: '60px'
                   }}
+                  onFocus={(e) => e.currentTarget.select()}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
                 />
@@ -249,6 +261,7 @@ export default function DateTimePicker({
                     color: '#010D00',
                     width: '60px'
                   }}
+                  onFocus={(e) => e.currentTarget.select()}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
                 />
