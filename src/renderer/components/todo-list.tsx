@@ -236,7 +236,7 @@ export default function TodoList() {
                 // 3) addTodo에 전체 객체 넘기기
                 const manualDueDate = buildDueDateFromInput(dueDateInput, dueTime);
 
-                await addTodo(parsed, manualDueDate);
+                await addTodo(parsed, manualDueDate, dueTime);  // ✅ dueTime 전달
 
               } catch (err) {
                 console.error(err);

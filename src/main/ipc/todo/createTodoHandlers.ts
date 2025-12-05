@@ -17,12 +17,13 @@ export interface CreateTodoInput {
   title: string
   alertTime?: Date | string | number | null
   dueDate?: Date | string | number | null
+  dueTime?: string | null  // 'HH:MM' 형식 - 시간이 명시적으로 설정되었는지 체크용
   priority?: number | null
   tags?: string[]
 }
 
 export async function createTodo(todoData: CreateTodoInput) {
-  const { title, dueDate, priority, tags } = todoData
+  const { title, dueDate, dueTime, priority, tags } = todoData
 
   // 1) AI로 카테고리 자동 분류
   const categoryResult = analyzeCategory(title)
@@ -31,9 +32,9 @@ export async function createTodo(todoData: CreateTodoInput) {
   // 2) 마감 시간(dueDate): 사용자가 입력한 시간 그대로 문자열로 저장
   const dueDateStr = toYmdHm(dueDate)
 
-  // 3) 리마인더(alertTime): 마감 5분 전으로 문자열 저장
+  // 3) 리마인더(alertTime): 시간이 명시적으로 설정된 경우에만 5분 전으로 생성
   let alertTimeStr: string | null = null
-  if (dueDateStr) {
+  if (dueDateStr && dueTime) {  // ✅ dueTime이 있을 때만 alertTime 생성
     const base = new Date(dueDate as any)
     if (!Number.isNaN(base.getTime())) {
       base.setMinutes(base.getMinutes() - 5)

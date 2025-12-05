@@ -18,12 +18,16 @@ export function useTodoFilters({ todos, selectedDate }: UseTodoFiltersProps) {
   // 카테고리별 TODO 가져오기
   const getTodosByCategory = (category: string) => {
     const filtered = getFilteredTodos();
-    
+
     let categoryTodos: Todo[];
     if (category === 'schedule') {
+      // 스케줄: 시간이 설정된 todo만
       categoryTodos = filtered.filter(todo => todo.dueTime);
     } else {
-      categoryTodos = filtered.filter(todo => todo.category === category);
+      // 다른 카테고리: 해당 카테고리이면서 시간이 없는 todo만 (중복 방지)
+      categoryTodos = filtered.filter(todo =>
+        todo.category === category && !todo.dueTime
+      );
     }
     
     // 정렬: 고정 → 시간순
