@@ -24,10 +24,8 @@ export function useTodoFilters({ todos, selectedDate }: UseTodoFiltersProps) {
       // 스케줄: 시간이 설정된 todo만
       categoryTodos = filtered.filter(todo => todo.dueTime);
     } else {
-      // 다른 카테고리: 해당 카테고리이면서 시간이 없는 todo만 (중복 방지)
-      categoryTodos = filtered.filter(todo =>
-        todo.category === category && !todo.dueTime
-      );
+      // 다른 카테고리: 해당 카테고리인 todo (시간 있어도 표시)
+      categoryTodos = filtered.filter(todo => todo.category === category);
     }
     
     // 정렬: 고정 → 시간순
