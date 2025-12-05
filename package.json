@@ -16,7 +16,9 @@
     "db:generate": "drizzle-kit generate:sqlite",
     "db:push": "drizzle-kit push:sqlite",
     "db:migrate": "drizzle-kit migrate:sqlite",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "postinstall": "electron-rebuild",
+    "electron-rebuild": "electron-rebuild"
   },
   "keywords": [
     "electron",
@@ -33,11 +35,14 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.22",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.18.1",
     "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
     "vite-plugin-electron": "^0.29.0",

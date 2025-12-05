@@ -1,33 +1,37 @@
-import { db, dbPath, sqlite } from './connection.js'
+import { db, getSqlite, getDbPath, initializeDatabaseConnection, updateDbPath } from './connection.js'
 
 // 데이터베이스 연결 종료 함수
 export function closeDatabase(): void {
-  sqlite.close()
+  getSqlite().close()
 }
 
 // 마이그레이션 및 초기화 함수
 export async function initializeDatabase(): Promise<void> {
   try {
+    // Initialize the database connection first
+    initializeDatabaseConnection();
+    updateDbPath();
+
     // todos 테이블이 없으면 생성 (단일 테이블 스키마)
-    sqlite.exec(`
+    getSqlite().exec(`
       CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         title TEXT NOT NULL,
         category TEXT,
         priority INTEGER,
         tags TEXT,
-        alert_time INTEGER,
-        due_date INTEGER,
+        alert_time TEXT,
+        due_date TEXT,
         completed INTEGER DEFAULT 0,
         pinned INTEGER DEFAULT 0,
-        created_at INTEGER DEFAULT (strftime('%s','now')),
-        updated_at INTEGER,
+        created_at TEXT DEFAULT (strftime('%Y-%m-%d %H:%M','now','localtime')),
+        updated_at TEXT,
         deleted_at INTEGER
       );
     `)
 
     console.log('Database initialized successfully')
-    console.log('Database path:', dbPath)
+    console.log('Database path:', getDbPath())
   } catch (error) {
     console.error('Database initialization failed:', error)
     throw error

@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, app } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -35,9 +35,26 @@ export function createWindow(): BrowserWindow {
     mainWindow.show()
   })
 
-  // Handle window closed
-  mainWindow.on('closed', () => {
-    // Dereference the window object
+  // OS별 창 관리 로직
+  // 트레이가 있으므로 X 버튼 클릭 시 hide (양쪽 플랫폼 모두)
+  mainWindow.on('close', (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+
+      // macOS: Dock 아이콘도 숨김
+      if (process.platform === 'darwin' && app.dock) {
+        app.dock.hide()
+      }
+    }
+    // app.isQuitting이 true면 정상 종료
+  })
+
+  // macOS Dock 관리
+  mainWindow.on('show', () => {
+    if (process.platform === 'darwin' && app.dock) {
+      app.dock.show()
+    }
   })
 
   return mainWindow

@@ -1,12 +1,22 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { createWindow } from './windows'
 import { registerShortcuts } from './shortcuts'
-import { setupTodoHandlers } from './ipc/todoHandlers'
-import { setupAiHandlers } from './ipc/aiHandlers'
-import { setupAppHandlers } from './ipc/appHandlers'
+import { createTray } from './tray'
+import { setupTodoHandlers } from './ipc/todo/todoHandlers'
+import { setupAiHandlers } from './ipc/ai/aiHandlers'
+import { setupAppHandlers } from './ipc/app/appHandlers'
 import * as Drizzle from './db/drizzle'
 import { runMigration } from './utils/migrate'
+import { setupGptAiHandlers } from './ipc/gpt/gptAiHandlers'
 
+// 전역 타입 선언
+declare global {
+  namespace Electron {
+    interface App {
+      isQuitting?: boolean
+    }
+  }
+}
 
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null
@@ -23,6 +33,9 @@ app.whenReady().then(async () => {
     // Create the main window
     mainWindow = createWindow()
 
+    // Create system tray
+    createTray(mainWindow)
+
     // Register global shortcuts
     registerShortcuts(mainWindow)
 
@@ -30,6 +43,7 @@ app.whenReady().then(async () => {
     setupTodoHandlers(ipcMain)
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
+    setupGptAiHandlers(ipcMain)
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()
@@ -40,15 +54,27 @@ app.whenReady().then(async () => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWindow = createWindow()
+    } else if (mainWindow) {
+      // Dock 아이콘 클릭 시 창 표시 (macOS)
+      mainWindow.show()
     }
   })
 })
 
-// Quit when all windows are closed, except on macOS
+// before-quit 이벤트
+app.on('before-quit', () => {
+  app.isQuitting = true
+})
+
+// window-all-closed 이벤트 수정
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // 트레이가 있으므로 창이 모두 닫혀도 앱은 계속 실행
+  // macOS, Windows, Linux 모두 트레이에서 실행 유지
+  // 완전 종료는 트레이 메뉴에서 "종료" 선택 시에만
+  if (app.isQuitting) {
     app.quit()
   }
+  // 트레이가 있으므로 창 없이도 백그라운드에서 실행
 })
 
 // Security: Prevent new window creation

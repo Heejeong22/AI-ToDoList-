@@ -1,4 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { CreateTodoInput } from 'src/main/ipc/todo/createTodoHandlers';
+
 
 // Type definitions for the exposed API
 interface Todo {
@@ -27,7 +29,7 @@ const api = {
     getAll: (): Promise<ApiResponse<Todo[]>> =>
       ipcRenderer.invoke('todo:getAll'),
 
-    create: (todo: Todo): Promise<ApiResponse<Todo>> =>
+    create: (todo: CreateTodoInput): Promise<ApiResponse<any>> =>
       ipcRenderer.invoke('todo:create', todo),
 
     update: (id: number, updates: Partial<Todo>): Promise<ApiResponse<Todo>> =>
@@ -68,6 +70,9 @@ const api = {
 
     getAnalysisHistory: (todoId: number): Promise<ApiResponse> =>
       ipcRenderer.invoke('ai:getAnalysisHistory', todoId),
+
+    gptAnalyzeTodo: (text: string): Promise<ApiResponse> =>
+      ipcRenderer.invoke('gptAI:analyzeTodo', text),
   },
 
   // 앱 관련 API
@@ -131,6 +136,29 @@ const api = {
   // 이벤트 리스너 제거
   removeListener: (channel: string, callback: (...args: any[]) => void) => {
     ipcRenderer.removeListener(channel, callback)
+  },
+
+  // 단축키 이벤트 리스너 (cleanup 함수 반환)
+  onShortcut: (channel: string, callback: () => void) => {
+    const subscription = (_event: any) => callback()
+
+    // 허용된 채널만 리스닝
+    const allowedChannels = [
+      'new-todo',
+      'ai-analysis',
+      'search',
+      'quick-add',
+      'escape'
+    ]
+
+    if (allowedChannels.includes(channel)) {
+      ipcRenderer.on(`shortcut:${channel}`, subscription)
+    }
+
+    // Cleanup 함수 반환
+    return () => {
+      ipcRenderer.removeListener(`shortcut:${channel}`, subscription)
+    }
   },
 
   // 일반적인 invoke (다른 API에서 처리되지 않은 경우)

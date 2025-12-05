@@ -11,7 +11,7 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron/main',
             rollupOptions: {
-              external: ['better-sqlite3'],
+              external: ['electron', 'better-sqlite3', 'fs', 'path', 'os', 'child_process', 'openai'],
             },
           },
         },
@@ -21,6 +21,9 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist-electron/preload',
+            rollupOptions: {
+              external: ['electron'],
+            },
           },
         },
       },
