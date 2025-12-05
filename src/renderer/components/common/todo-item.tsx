@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Trash2, Edit2, Pin, X, Save, Clock } from 'lucide-react';
 import AlertModal from './alert-modal';
 import { TodoItemProps } from '../types';
 import { getTimeDisplayText } from '../utils/date-utils';
@@ -44,132 +46,122 @@ export default function TodoItem({
 
   return (
     <>
-      <div className="group py-2 hover:bg-bg-hover transition-colors rounded -ml-5 pl-5 pr-2">
-        <div className="flex items-start gap-2.5">
-          {/* 체크박스 */}
-          <button
-            onClick={() => onToggleComplete(id)}
-            className={`mt-0.5 w-5 h-5 flex items-center justify-center rounded flex-shrink-0 transition-colors ${
-              completed
-                ? 'bg-accent border-2 border-accent'
-                : 'border-2 border-input-border hover:border-accent'
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 15 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        whileHover={{ scale: 1.01, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.1)" }}
+        whileTap={{ scale: 0.98 }}
+        className={`group relative flex items-center gap-3 py-3 px-3.5 mb-2.5 rounded-2xl transition-colors duration-200 border-1.2 ${completed
+          ? 'bg-bg-secondary/50 border-transparent opacity-80'
+          : 'bg-white dark:bg-zinc-800 border-black dark:border-transparent shadow-sm hover:border-black'
+          }`}
+      >
+        {/* Checkbox */}
+        <button
+          onClick={() => onToggleComplete(id)}
+          disabled={isEditing}
+          className={`flex-shrink-0 w-[18px] h-[18px] rounded-[6px] flex items-center justify-center transition-all duration-200 ${completed
+            ? 'bg-black border-1.2 border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm'
+            : 'bg-white dark:bg-transparent border-1.2 border-black dark:border-white/30 hover:bg-black/5'
             }`}
-            disabled={isEditing}
-          >
-            {completed && (
-              <svg className="w-3.5 h-3.5 text-bg-card" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-          </button>
-          
-          <div className="flex-1 min-w-0">
-            {/* 수정 모드 */}
+        >
+          {completed && <Check size={12} strokeWidth={3} />}
+        </button>
+
+        <div className="flex flex-col flex-1 min-w-0">
+          <div className="flex items-start justify-between">
             {isEditing ? (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full px-3 py-2 text-base border-2 border-input-border rounded focus:outline-none focus:ring-2 focus:ring-accent bg-bg-card text-text-primary font-medium"
-                  autoFocus
-                  maxLength={100}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSaveEdit}
-                    className="px-4 py-1.5 text-sm bg-accent text-bg-card rounded hover:bg-text-secondary transition-colors font-semibold"
-                  >
-                    저장
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="px-4 py-1.5 text-sm bg-bg-hover text-text-primary rounded hover:bg-bg-secondary transition-colors font-semibold border border-border"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full bg-transparent border-none p-0 -ml-[1px] focus:outline-none focus:ring-0 text-text-primary font-medium text-base leading-snug"
+                autoFocus
+                maxLength={100}
+                spellCheck={false}
+                autoComplete="off"
+              />
             ) : (
-              <div className="flex items-baseline gap-2 flex-wrap">
-                {/* TODO 텍스트 */}
-                <span 
-                  className={`text-base cursor-pointer font-medium ${
-                    completed ? 'line-through text-text-secondary' : 'text-text-primary'
+              <span
+                className={`text-base leading-snug cursor-text transition-colors font-medium ${completed ? 'line-through text-text-tertiary' : 'text-text-primary'
                   }`}
-                  onDoubleClick={() => !completed && setIsEditing(true)}
-                  title="더블클릭하여 수정"
-                >
-                  {text}
-                </span>
-                
-                {/* 시간 정보 */}
-                {dueTime && (
-                  <span className="text-sm text-text-secondary font-medium">
-                    {getTimeDisplayText(dueTime)}
-                  </span>
-                )}
-                
-                {/* 고정 표시 */}
-                {isPinned && (
-                  <svg className="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                )}
-              </div>
+                onDoubleClick={() => !completed && setIsEditing(true)}
+              >
+                {text}
+              </span>
             )}
           </div>
 
-          {/* 우측 버튼 그룹 */}
-          {!isEditing && (
-            <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              {/* 수정 */}
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 rounded hover:bg-bg-secondary transition-colors text-accent hover:text-text-primary"
-                title="수정"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-
-              {/* 고정 */}
-              <button
-                onClick={() => onTogglePin(id)}
-                className={`p-1.5 rounded transition-colors ${
-                  isPinned 
-                    ? 'text-accent hover:bg-bg-secondary' 
-                    : 'text-accent hover:text-text-primary hover:bg-bg-secondary'
-                }`}
-                title={isPinned ? '고정 해제' : '고정'}
-              >
-                <svg className="w-4 h-4" fill={isPinned ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
-
-              {/* 삭제 */}
-              <button
-                onClick={() => onDelete(id)}
-                className="p-1.5 rounded hover:bg-red-100 transition-colors text-accent hover:text-red-600"
-                title="삭제"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+          {(dueTime || isPinned) && (
+            <div className="flex items-center gap-2 mt-0.5 min-h-[1.25rem]">
+              {dueTime && (
+                <span className={`text-xs flex items-center gap-1 font-medium ${completed ? 'text-text-tertiary' : 'text-primary'}`}>
+                  <Clock size={12} strokeWidth={2} />
+                  {getTimeDisplayText(dueTime)}
+                </span>
+              )}
+              {isPinned && <Pin size={12} className="text-orange-500 transform rotate-45" fill="currentColor" />}
             </div>
           )}
         </div>
-      </div>
 
-      {/* 알림 모달 */}
+        {/* Action Buttons */}
+        <div className={`flex items-center gap-1 transition-opacity absolute right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-700/90 backdrop-blur-sm shadow-md border border-gray-200 dark:border-white/10 rounded-xl p-1 z-20 ${isEditing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}>
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleSaveEdit}
+                className="p-1.5 text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-lg transition-colors"
+                title="Save"
+              >
+                <Check size={14} strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-1.5 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                title="Cancel"
+              >
+                <X size={14} strokeWidth={2.5} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-1.5 text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-lg transition-colors"
+                title="Edit"
+              >
+                <Edit2 size={14} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => onTogglePin(id)}
+                className={`p-1.5 rounded-lg transition-colors ${isPinned ? 'text-orange-500 bg-orange-50 dark:bg-orange-500/20' : 'text-text-secondary hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/20'
+                  }`}
+                title={isPinned ? 'Unpin' : 'Pin'}
+              >
+                <Pin size={14} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => onDelete(id)}
+                className="p-1.5 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={14} strokeWidth={2} />
+              </button>
+            </>
+          )}
+        </div>
+      </motion.div >
+
       <AlertModal
         isOpen={showAlert}
-        title="입력 필요"
-        message="내용을 입력해주세요!"
+        title="Input Required"
+        message="Please enter some text."
         onConfirm={() => setShowAlert(false)}
       />
     </>

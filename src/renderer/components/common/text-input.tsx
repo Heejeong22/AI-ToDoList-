@@ -1,4 +1,5 @@
 import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from 'react';
+import { Clock, X, ArrowUp } from 'lucide-react';
 import DateTimePicker from './date-time-picker';
 import AlertModal from './alert-modal';
 import { getDateDisplayText, getTimeDisplayText, isSameDay } from '../utils/date-utils';
@@ -12,7 +13,7 @@ interface TextInputProps {
 }
 
 export default function TextInput({
-  placeholder = '입력하세요',
+  placeholder = 'Add a new task...',
   maxLength = 100,
   rows = 1,
   onSubmit,
@@ -40,7 +41,6 @@ export default function TextInput({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // 한글/일본어/중국어 등 IME 조합 중일 때는 무시
     if (e.nativeEvent.isComposing) {
       return;
     }
@@ -59,7 +59,6 @@ export default function TextInput({
       return;
     }
 
-    // 이미 submit 중이면 무시
     if (isSubmitting) {
       return;
     }
@@ -86,17 +85,16 @@ export default function TextInput({
   };
 
   const getDateTimeDisplay = () => {
+    const dateText = getDateDisplayText(selectedDate);
     if (selectedTime) {
-      const dateText = getDateDisplayText(selectedDate);
       return `${dateText} ${getTimeDisplayText(selectedTime)}`;
     }
-    return '시간 추가';
+    return dateText;
   };
 
   return (
     <>
-      <div className="space-y-3">
-        {/* 입력창 */}
+      <div className="bg-white dark:bg-zinc-800 border-1.2 border-black dark:border-zinc-700 focus-within:shadow-xl focus-within:-translate-y-[1px] transition-all duration-200 rounded-2xl shadow-sm p-1">
         <textarea
           ref={textareaRef}
           value={inputValue}
@@ -105,58 +103,55 @@ export default function TextInput({
           placeholder={placeholder}
           rows={rows}
           maxLength={maxLength}
-          className="w-full p-3 rounded-lg resize-none focus:outline-none transition-all text-base bg-bg-card text-text-primary font-medium border-2 border-border"
+          className="w-full bg-transparent text-text-primary placeholder:text-text-tertiary text-base font-medium resize-none focus:outline-none py-2.5 px-3"
         />
-        
-        {/* 하단 버튼들 */}
-        <div className="flex justify-between items-center">
+
+        <div className="flex justify-between items-center px-2 pb-2 mt-1">
           <div className="flex items-center gap-2">
-            {/* 시간 설정 버튼 */}
             <button
               onClick={() => setIsPickerOpen(true)}
-              className="px-3 py-2 text-sm bg-bg-card text-text-primary rounded hover:bg-bg-secondary transition-colors flex items-center gap-1.5 font-medium border border-border"
+              className={`group p-2 rounded-xl flex items-center gap-2 transition-all border border-transparent ${selectedTime
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'text-text-tertiary hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10'
+                }`}
+              title="Set date & time"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>{getDateTimeDisplay()}</span>
+              <Clock size={20} strokeWidth={2.5} className="transition-transform group-hover:scale-110" />
+              {(selectedTime || !isSameDay(selectedDate, defaultDate)) && (
+                <span className="text-xs font-semibold">{getDateTimeDisplay()}</span>
+              )}
             </button>
-            
-            {/* 시간 제거 버튼 */}
+
             {selectedTime && (
               <button
                 onClick={() => setSelectedTime(undefined)}
-                className="px-2 py-2 text-sm text-accent hover:text-text-primary transition-colors"
-                title="시간 제거"
+                className="p-1.5 text-text-secondary hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                title="Remove time"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X size={14} />
               </button>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-text-secondary font-medium">
+            <span className={`text-xs font-medium transition-colors ${inputValue.length >= maxLength ? 'text-red-500' : 'text-text-tertiary'
+              }`}>
               {inputValue.length}/{maxLength}
             </span>
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`px-5 py-2 text-base rounded-lg transition-colors font-bold ${
-                isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-accent hover:bg-text-secondary'
-              }`}
-              style={{ color: '#FEFDFB' }}
+              disabled={isSubmitting || !inputValue.trim()}
+              className={`p-2 rounded-xl transition-all duration-200 ${inputValue.trim()
+                ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm hover:opacity-90 active:scale-95'
+                : 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-600 cursor-not-allowed opacity-50'
+                }`}
             >
-              {isSubmitting ? '추가 중...' : '추가'}
+              <ArrowUp size={20} strokeWidth={3} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* 날짜/시간 선택 모달 */}
       <DateTimePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
@@ -165,11 +160,11 @@ export default function TextInput({
         initialTime={selectedTime}
       />
 
-      {/* 알림 모달 */}
       <AlertModal
         isOpen={showAlert}
-        title="입력 필요"
-        message="내용을 입력해주세요!"
+        title="Empty Task"
+        message="Please enter a task description!"
+        confirmText="Got it"
         onConfirm={handleAlertClose}
       />
     </>

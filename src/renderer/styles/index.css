@@ -2,47 +2,140 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-bg-primary: #E8DCC8;
-  --color-bg-secondary: #D4C4A8;
-  --color-bg-card: #F5EFE0;
-  --color-bg-hover: #DDD0BA;
-  --color-text-primary: #1A1410;
-  --color-text-secondary: #4A3F35;
-  --color-accent: #5D4E3E;
-  --color-border: #9B8B7E;
-  --color-input-border: #8B7A6A;
+@layer base {
+  :root {
+    /* 
+      Clean, Minimal, Flat Design Palette 
+      Using a Zinc-based neutral scale for a premium feel.
+    */
+    --bg-primary: 255 255 255;
+    /* #ffffff */
+    --bg-secondary: 249 250 251;
+    /* #f9fafb (gray-50) */
+    --bg-tertiary: 243 244 246;
+    /* #f3f4f6 (gray-100) */
+
+    --text-primary: 24 24 27;
+    /* #18181b (zinc-900) */
+    --text-secondary: 82 82 91;
+    /* #52525b (zinc-600) */
+    --text-tertiary: 161 161 170;
+    /* #a1a1aa (zinc-400) */
+
+    --border-primary: 228 228 231;
+    /* #e4e4e7 (zinc-200) */
+    --border-secondary: 244 244 245;
+    /* #f4f4f5 (zinc-100) */
+
+    --primary: 37 99 235;
+    /* #2563eb (blue-600) */
+    --primary-foreground: 255 255 255;
+
+    /* Pastel Palette */
+    --pastel-pink: 254 226 226;
+    /* red-100 */
+    --pastel-blue: 219 234 254;
+    /* blue-100 */
+    --pastel-green: 220 252 231;
+    /* green-100 */
+    --pastel-yellow: 254 249 195;
+    /* yellow-100 */
+    --pastel-purple: 243 232 255;
+    /* purple-100 */
+    --pastel-orange: 255 237 213;
+    /* orange-100 */
+
+    /* Text colors for pastel backgrounds */
+    --text-pink: 153 27 27;
+    /* red-800 */
+    --text-blue: 30 64 175;
+    /* blue-800 */
+    --text-green: 22 101 52;
+    /* green-800 */
+    --text-yellow: 133 77 14;
+    /* yellow-800 */
+    --text-purple: 107 33 168;
+    /* purple-800 */
+    --text-orange: 154 52 18;
+    /* orange-800 */
+  }
+
+  .dark {
+    --bg-primary: 24 24 27;
+    /* #18181b (zinc-900) */
+    --bg-secondary: 39 39 42;
+    /* #272727a (zinc-800) */
+    --bg-tertiary: 63 63 70;
+    /* #3f3f46 (zinc-700) */
+
+    --text-primary: 250 250 250;
+    /* #fafafa (zinc-50) */
+    --text-secondary: 161 161 170;
+    /* #a1a1aa (zinc-400) */
+    --text-tertiary: 113 113 122;
+    /* #71717a (zinc-500) */
+
+    --border-primary: 63 63 70;
+    /* #3f3f46 (zinc-700) */
+    --border-secondary: 39 39 42;
+    /* #27272a (zinc-800) */
+
+    --primary: 96 165 250;
+    /* #60a5fa (blue-400) */
+    --primary-foreground: 24 24 27;
+
+    /* Dark Mode Pastel (muted/transparent or just kept same? Let's use opacity in usage or softer colors) */
+    /* For variables, let's keep them but maybe usage in components handles opacity */
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary antialiased transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-300 dark:bg-zinc-700 rounded-full border-[2px] border-transparent bg-clip-content;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-400 dark:bg-zinc-600;
+  }
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-#root {
-  width: 100%;
-  height: 100vh;
-}
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
+  .glass {
+    @apply bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-white/20 dark:border-zinc-800/50;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
-}
+  /* Retro Flat Components (Black Lines) */
+  .card-neo {
+    @apply bg-white dark:bg-zinc-800 border-1.2 border-black dark:border-transparent shadow-sm rounded-2xl;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 5px;
-}
+  .btn-neo {
+    @apply px-4 py-2 bg-primary text-primary-foreground font-bold border-1.2 border-black dark:border-transparent shadow-sm transform transition-all active:scale-95 rounded-xl hover:opacity-90;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  .input-neo {
+    @apply w-full bg-white dark:bg-zinc-900 border-1.2 border-black dark:border-transparent focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl p-3 placeholder:text-text-tertiary transition-all outline-none;
+  }
 }

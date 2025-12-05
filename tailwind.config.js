@@ -1,28 +1,73 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/renderer/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class',
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
-        // 브라운 톤
-        'bg': {
-          'primary': '#E8DCC8',      // 양피지 메인 배경 (더 진함)
-          'secondary': '#D4C4A8',    // 양피지 보조 배경
-          'card': '#F5EFE0',         // 카드 배경 (조금 밝게)
-          'hover': '#DDD0BA',        // 호버 배경
+        bg: {
+          primary: "rgb(var(--bg-primary))",
+          secondary: "rgb(var(--bg-secondary))",
+          tertiary: "rgb(var(--bg-tertiary))",
         },
-        // 검정 계열 텍스트
-        'text': {
-          'primary': '#1A1410',      // 진한 검정
-          'secondary': '#4A3F35',    // 중간 검정-브라운
+        text: {
+          primary: "rgb(var(--text-primary))",
+          secondary: "rgb(var(--text-secondary))",
+          tertiary: "rgb(var(--text-tertiary))",
         },
-        // 진한 브라운 계열
-        'accent': '#5D4E3E',         // 액센트 (더 진함)
-        'border': '#9B8B7E',         // 테두리 (더 진함)
-        'input-border': '#8B7A6A',   // 입력창 테두리 (더 진함)
+        border: {
+          DEFAULT: "rgb(var(--border-primary))",
+          secondary: "rgb(var(--border-secondary))",
+        },
+        primary: {
+          DEFAULT: "rgb(var(--primary))",
+          foreground: "rgb(var(--primary-foreground))",
+        },
+        pastel: {
+          pink: "rgb(var(--pastel-pink))",
+          blue: "rgb(var(--pastel-blue))",
+          green: "rgb(var(--pastel-green))",
+          yellow: "rgb(var(--pastel-yellow))",
+          purple: "rgb(var(--pastel-purple))",
+          orange: "rgb(var(--pastel-orange))",
+        },
+        ptext: {
+          pink: "rgb(var(--text-pink))",
+          blue: "rgb(var(--text-blue))",
+          green: "rgb(var(--text-green))",
+          yellow: "rgb(var(--text-yellow))",
+          purple: "rgb(var(--text-purple))",
+          orange: "rgb(var(--text-orange))",
+        }
+      },
+      borderRadius: {
+        lg: "var(--radius-lg)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
+      boxShadow: {
+        'neo': '4px 4px 0px 0px rgba(0,0,0,1)',
+        'neo-sm': '2px 2px 0px 0px rgba(0,0,0,1)',
+        'neo-lg': '6px 6px 0px 0px rgba(0,0,0,1)',
+      },
+      borderWidth: {
+        '1.2': '1.2px',
+        '3': '3px',
+      },
+      transformOrigin: {
+        'neo': 'top left',
       },
     },
   },
