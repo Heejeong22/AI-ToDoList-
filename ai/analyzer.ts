@@ -4,7 +4,7 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { safeParseJSON } from "./parser";
+import { safeParseJSON } from "../src/main/parser";
 import { createSystemPrompt } from "./prompt";
 
 const client = new OpenAI({

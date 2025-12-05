@@ -1,5 +1,6 @@
-import { useState, KeyboardEvent, ChangeEvent } from 'react';
+import { useState, useRef, KeyboardEvent, ChangeEvent } from 'react';
 import DateTimePicker from './date-time-picker';
+import AlertModal from './alert-modal';
 import { getDateDisplayText, getTimeDisplayText } from '../utils/date-utils';
 
 interface TextInputProps {
@@ -21,6 +22,8 @@ export default function TextInput({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [showAlert, setShowAlert] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -40,12 +43,18 @@ export default function TextInput({
     const trimmedValue = inputValue.trim();
     
     if (trimmedValue === '') {
-      alert('내용을 입력해주세요!');
+      setShowAlert(true);
       return;
     }
 
     onSubmit(trimmedValue, selectedDate, selectedTime);
     setInputValue('');
+    textareaRef.current?.focus();
+  };
+
+  const handleAlertClose = () => {
+    setShowAlert(false);
+    textareaRef.current?.focus();
   };
 
   const handleDateTimeConfirm = (date: Date, time?: string) => {
@@ -66,6 +75,7 @@ export default function TextInput({
       <div className="space-y-3">
         {/* 입력창 */}
         <textarea
+          ref={textareaRef}
           value={inputValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -124,6 +134,14 @@ export default function TextInput({
         onConfirm={handleDateTimeConfirm}
         initialDate={selectedDate}
         initialTime={selectedTime}
+      />
+
+      {/* 알림 모달 */}
+      <AlertModal
+        isOpen={showAlert}
+        title="입력 필요"
+        message="내용을 입력해주세요!"
+        onConfirm={handleAlertClose}
       />
     </>
   );

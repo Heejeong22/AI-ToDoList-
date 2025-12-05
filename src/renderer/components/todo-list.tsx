@@ -1,209 +1,58 @@
-import { useEffect, useState } from 'react';
 import TextInput from './common/text-input';
 import CategorySection from './category-section';
 import ExpandCollapseButton from './common/expand-collapse-button';
+import HelpButton from './common/help-button';
+import AlertModal from './common/alert-modal';
+import TutorialModal from './common/tutorial-modal';
+import LoadingModal from './common/loading-modal';
 import { CATEGORIES } from './constants';
-import { Todo } from './types';
 import { getToday, getDateDisplayText, isSameDay } from './utils/date-utils';
+import { useTodoState } from './hooks/use-todo-state';
+import { useTodoActions } from './hooks/use-todo-actions';
+import { useTodoFilters } from './hooks/use-todo-filters';
+import { useModals } from './hooks/use-modals';
+import { safeParseJSON } from '../../main/parser'; 
 
 export default function TodoList() {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(getToday());
-  
-  // 확장된 카테고리 Set (categoryValue 저장)
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(CATEGORIES.map(cat => cat.value)) // 처음엔 모두 확장
-  );
+  // 커스텀 훅으로 상태 관리 분리
+  const {
+    todos,
+    setTodos,
+    selectedDate,
+    setSelectedDate,
+    expandedCategories,
+    setExpandedCategories,
+    isLoading,
+    setIsLoading,
+    mapDbTodoToUiTodo,
+  } = useTodoState();
 
+  // 모달 관리
+  const {
+    alertModal,
+    showAlert,
+    closeAlert,
+    showTutorial,
+    openTutorial,
+    closeTutorial,
+  } = useModals();
 
-  // DB Todo → UI Todo 매핑
-  const mapDbTodoToUiTodo = (dbTodo: any): Todo => {
-    const toDate = (value: any): Date => {
-      if (value == null) return getToday();
-      if (value instanceof Date) return value;
-      if (typeof value === 'number') {
-        // (과거 버전 호환) SQLite 정수(UNIX 초) → Date
-        return new Date(value * 1000);
-      }
-      const str = String(value);
-      // "YYYY-MM-DD HH:MM" 형태를 안전하게 파싱
-      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(str)) {
-        const iso = str.replace(' ', 'T');
-        const parsed = new Date(iso);
-        if (!Number.isNaN(parsed.getTime())) return parsed;
-      }
-      const parsed = new Date(value);
-      if (!Number.isNaN(parsed.getTime())) return parsed;
-      return getToday();
-    };
+  // CRUD 액션
+  const { addTodo, toggleComplete, togglePin, deleteTodo, editTodo } = useTodoActions({
+    todos,
+    setTodos,
+    setIsLoading,
+    mapDbTodoToUiTodo,
+    showAlert,
+  });
 
-    // DB에 저장된 due_date(문자열)를 그대로 사용자가 설정한 마감 시간으로 사용
-    const dueDate = toDate(dbTodo.dueDate ?? dbTodo.due_date);
-    const createdAt = toDate(dbTodo.createdAt ?? dbTodo.created_at);
+  // 필터링 & 통계
+  const { getTodosByCategory, getStats } = useTodoFilters({
+    todos,
+    selectedDate,
+  });
 
-    const toTimeString = (date: Date | null): string | undefined => {
-      if (!date) return undefined;
-      const h = date.getHours().toString().padStart(2, '0');
-      const m = date.getMinutes().toString().padStart(2, '0');
-      if (h === '00' && m === '00') return undefined;
-      return `${h}:${m}`;
-
-    };
-
-    return {
-      id: dbTodo.id,
-      text: dbTodo.title ?? dbTodo.text ?? '',
-      category: dbTodo.category ?? 'etc',
-      completed: Boolean(dbTodo.completed),
-      isPinned: Boolean(dbTodo.pinned),
-      dueDate,
-      dueTime: toTimeString(dueDate),
-      createdAt,
-    };
-  };
-
-  // 마운트 시 DB에서 Todo 불러오기
-  useEffect(() => {
-    const loadTodos = async () => {
-      try {
-        const response = await window.api.todo.getAll();
-        if (response.success && response.data) {
-          const mapped = response.data.map((t: any) => mapDbTodoToUiTodo(t));
-          setTodos(mapped);
-        } else {
-          console.error('Failed to load todos:', response.error);
-        }
-      } catch (error) {
-        console.error('Error loading todos from DB:', error);
-      }
-    };
-
-    loadTodos();
-  }, []);
-
-  // TODO 추가 핸들러 (DB + AI 카테고리)
-  const handleAddTodo = async (text: string, dueDate: Date, dueTime?: string) => {
-    try {
-      const fullDueDate = new Date(dueDate);
-      if (dueTime) {
-        const [h, m] = dueTime.split(':').map(Number);
-        if (!Number.isNaN(h) && !Number.isNaN(m)) {
-          fullDueDate.setHours(h, m, 0, 0);
-        }
-      }
-
-      const response = await window.api.todo.create({
-        title: text,
-        dueDate: fullDueDate,
-      } as any);
-
-      if (!response.success || !response.data) {
-        console.error('Failed to create todo:', response.error);
-        alert('할 일 저장에 실패했습니다.');
-        return;
-      }
-
-      const created = mapDbTodoToUiTodo(response.data);
-      setTodos(prev => [...prev, created]);
-    } catch (error) {
-      console.error('Error creating todo:', error);
-      alert('할 일 저장 중 오류가 발생했습니다.');
-    }
-  };
-
-
-  // 완료 상태 토글 (DB 반영)
-  const toggleComplete = async (id: number) => {
-    try {
-      const response = await window.api.todo.toggleComplete(id);
-      if (!response.success || !response.data) {
-        console.error('Failed to toggle complete:', response.error);
-        return;
-      }
-
-      const updated = mapDbTodoToUiTodo(response.data);
-      setTodos(prev =>
-        prev.map(todo => (todo.id === id ? updated : todo)),
-      );
-    } catch (error) {
-      console.error('Error toggling complete:', error);
-    }
-  };
-
-  // 고정 핀 토글 (DB 반영)
-  const togglePin = async (id: number) => {
-    try {
-      const target = todos.find(t => t.id === id);
-      if (!target) return;
-
-      const response = await window.api.todo.update(id, {
-        pinned: !target.isPinned,
-      } as any);
-
-      if (!response.success || !response.data) {
-        console.error('Failed to toggle pin:', response.error);
-        return;
-      }
-
-      const updated = mapDbTodoToUiTodo(response.data);
-      setTodos(prev =>
-        prev.map(todo => (todo.id === id ? updated : todo)),
-      );
-    } catch (error) {
-      console.error('Error toggling pin:', error);
-    }
-  };
-
-  // TODO 삭제 (DB 반영)
-  const deleteTodo = async (id: number) => {
-
-    const todoToDelete = todos.find(todo => todo.id === id);
-    if (!todoToDelete) return;
-
-    const confirmMessage = `"${todoToDelete.text}"을(를) 삭제하시겠습니까?`;
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      const response = await window.api.todo.delete(id);
-      if (!response.success) {
-        console.error('Failed to delete todo:', response.error);
-        alert('삭제에 실패했습니다.');
-        return;
-      }
-
-      setTodos(prev => prev.filter(todo => todo.id !== id));
-    } catch (error) {
-      console.error('Error deleting todo:', error);
-      alert('삭제 중 오류가 발생했습니다.');
-    }
-  };
-
-  // TODO 텍스트 수정 (DB 반영)
-  const editTodo = async (id: number, newText: string) => {
-    try {
-      const response = await window.api.todo.update(id, {
-        title: newText,
-      } as any);
-
-      if (!response.success || !response.data) {
-        console.error('Failed to edit todo:', response.error);
-        alert('수정에 실패했습니다.');
-        return;
-      }
-
-      const updated = mapDbTodoToUiTodo(response.data);
-      setTodos(prev =>
-        prev.map(todo => (todo.id === id ? updated : todo)),
-      );
-    } catch (error) {
-      console.error('Error editing todo:', error);
-      alert('수정 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 개별 카테고리 토글
+  // 카테고리 확장/축소
   const toggleCategoryExpand = (categoryValue: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -216,47 +65,15 @@ export default function TodoList() {
     });
   };
 
-  // 전체 확장/축소 토글
   const toggleAllCategories = () => {
     if (expandedCategories.size > 0) {
-      // 하나라도 확장되어 있으면 모두 축소
       setExpandedCategories(new Set());
     } else {
-      // 모두 축소되어 있으면 모두 확장
       setExpandedCategories(new Set(CATEGORIES.map(cat => cat.value)));
     }
   };
 
-  const getFilteredTodos = () => {
-    return todos.filter(todo => 
-      todo.isPinned || isSameDay(todo.dueDate, selectedDate)
-    );
-  };
-
-  const getTodosByCategory = (category: string) => {
-    const filtered = getFilteredTodos();
-    
-    let categoryTodos: Todo[];
-    if (category === 'schedule') {
-      categoryTodos = filtered.filter(todo => todo.dueTime);
-    } else {
-      categoryTodos = filtered.filter(todo => todo.category === category);
-    }
-    
-    return categoryTodos.sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      
-      if (a.dueTime && b.dueTime) {
-        return a.dueTime.localeCompare(b.dueTime);
-      }
-      if (a.dueTime && !b.dueTime) return -1;
-      if (!a.dueTime && b.dueTime) return 1;
-      
-      return 0;
-    });
-  };
-
+  // 날짜 네비게이션
   const changeDate = (days: number) => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + days);
@@ -267,9 +84,7 @@ export default function TodoList() {
     setSelectedDate(getToday());
   };
 
-  const filteredTodos = getFilteredTodos();
-  const totalTodos = filteredTodos.length;
-  const completedTodos = filteredTodos.filter(todo => todo.completed).length;
+  const { totalTodos, completedTodos } = getStats();
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#FEFDFB' }}>
@@ -281,12 +96,14 @@ export default function TodoList() {
               TODO
             </h1>
             
-            {/* 전체 확장/축소 버튼 */}
-            <ExpandCollapseButton
-              expandedCategories={expandedCategories}
-              totalCategories={CATEGORIES.length}
-              onToggleAll={toggleAllCategories}
-            />
+            <div className="flex items-center gap-2">
+              <HelpButton onClick={openTutorial} />
+              <ExpandCollapseButton
+                expandedCategories={expandedCategories}
+                totalCategories={CATEGORIES.length}
+                onToggleAll={toggleAllCategories}
+              />
+            </div>
           </div>
           
           {/* 날짜 네비게이션 */}
@@ -294,10 +111,7 @@ export default function TodoList() {
             <button
               onClick={() => changeDate(-1)}
               className="p-2 rounded transition-colors"
-              style={{ 
-                backgroundColor: 'transparent',
-                color: '#736A5A'
-              }}
+              style={{ backgroundColor: 'transparent', color: '#736A5A' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
@@ -318,10 +132,7 @@ export default function TodoList() {
             <button
               onClick={() => changeDate(1)}
               className="p-2 rounded transition-colors"
-              style={{ 
-                backgroundColor: 'transparent',
-                color: '#736A5A'
-              }}
+              style={{ backgroundColor: 'transparent', color: '#736A5A' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
@@ -336,10 +147,7 @@ export default function TodoList() {
             <button
               onClick={goToToday}
               className="w-full mt-3 py-2 text-sm rounded transition-colors flex items-center justify-center gap-2"
-              style={{ 
-                backgroundColor: '#F2E8D5',
-                color: '#736A5A'
-              }}
+              style={{ backgroundColor: '#F2E8D5', color: '#736A5A' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
             >
@@ -376,7 +184,6 @@ export default function TodoList() {
                     onTogglePin={togglePin}
                     onDelete={deleteTodo}
                     onEdit={editTodo}
-                    onAddTodo={(text, dueTime) => handleAddTodo(text, selectedDate, dueTime, category.value)}
                     selectedDate={selectedDate}
                     isExpanded={expandedCategories.has(category.value)}
                     onToggleExpand={toggleCategoryExpand}
@@ -395,11 +202,50 @@ export default function TodoList() {
             placeholder="할 일을 입력하세요..."
             maxLength={100}
             rows={1}
-            onSubmit={(text, dueDate, dueTime) => handleAddTodo(text, dueDate, dueTime)}
+            onSubmit={async (text) => {
+              try {
+                setIsLoading(true);
+
+                // 1) GPT 호출
+                const response = await window.api.ai.gptAnalyzeTodo(text);
+
+                if (!response.success || !response.data) {
+                  showAlert("AI 분석 실패", "할 일을 분석할 수 없습니다.");
+                  return;
+                }
+
+                // 2) GPT JSON 파싱
+                const parsed = safeParseJSON(response.data);
+
+                if (!parsed) {
+                  showAlert("JSON 파싱 실패", "AI가 잘못된 JSON을 반환했습니다.");
+                  return;
+                }
+
+                // 3) addTodo에 전체 객체 넘기기
+                addTodo(parsed);
+
+              } catch (err) {
+                console.error(err);
+                showAlert("오류", "AI 분석 중 문제가 발생했습니다.");
+              } finally {
+                setIsLoading(false);
+              }
+            }}
             defaultDate={selectedDate}
           />
         </div>
       </div>
+
+      {/* 모달들 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        title={alertModal.title}
+        message={alertModal.message}
+        onConfirm={closeAlert}
+      />
+      <TutorialModal isOpen={showTutorial} onClose={closeTutorial} />
+      <LoadingModal isOpen={isLoading} message="AI가 카테고리를 분석하는 중입니다..." />
     </div>
   );
 }

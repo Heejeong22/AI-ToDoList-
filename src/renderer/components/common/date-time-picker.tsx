@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatDate, getToday } from '../utils/date-utils';
 
 interface DateTimePickerProps {
@@ -17,13 +17,39 @@ export default function DateTimePicker({
   initialTime
 }: DateTimePickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate || getToday());
-  const [selectedTime, setSelectedTime] = useState<string>(initialTime || '');
   const [includeTime, setIncludeTime] = useState<boolean>(!!initialTime);
+  
+  // 시간을 AM/PM과 시:분으로 분리
+  const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
+  const [hour, setHour] = useState<string>('9');
+  const [minute, setMinute] = useState<string>('00');
+
+  // initialTime이 있으면 파싱
+  useEffect(() => {
+    if (initialTime) {
+      const [h, m] = initialTime.split(':').map(Number);
+      setPeriod(h >= 12 ? 'PM' : 'AM');
+      setHour(String(h % 12 || 12));
+      setMinute(String(m).padStart(2, '0'));
+    }
+  }, [initialTime]);
 
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    onConfirm(selectedDate, includeTime ? selectedTime : undefined);
+    if (includeTime) {
+      // AM/PM과 시:분을 24시간 형식으로 변환
+      let hour24 = parseInt(hour);
+      if (period === 'PM' && hour24 !== 12) {
+        hour24 += 12;
+      } else if (period === 'AM' && hour24 === 12) {
+        hour24 = 0;
+      }
+      const timeString = `${String(hour24).padStart(2, '0')}:${minute}`;
+      onConfirm(selectedDate, timeString);
+    } else {
+      onConfirm(selectedDate, undefined);
+    }
     onClose();
   };
 
@@ -46,14 +72,29 @@ export default function DateTimePicker({
     setSelectedDate(newDate);
   };
 
-  const timeOptions: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute of [0, 30]) {
-      const h = String(hour).padStart(2, '0');
-      const m = String(minute).padStart(2, '0');
-      timeOptions.push(`${h}:${m}`);
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    if (value === '') {
+      setHour('');
+      return;
     }
-  }
+    const num = parseInt(value);
+    if (num >= 1 && num <= 12) {
+      setHour(String(num));
+    }
+  };
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    if (value === '') {
+      setMinute('');
+      return;
+    }
+    const num = parseInt(value);
+    if (num >= 0 && num <= 59) {
+      setMinute(String(num).padStart(2, '0'));
+    }
+  };
 
   return (
     <div
@@ -136,12 +177,7 @@ export default function DateTimePicker({
               type="checkbox"
               id="includeTime"
               checked={includeTime}
-              onChange={(e) => {
-                setIncludeTime(e.target.checked);
-                if (e.target.checked && !selectedTime) {
-                  setSelectedTime('09:00');
-                }
-              }}
+              onChange={(e) => setIncludeTime(e.target.checked)}
               className="w-4 h-4 rounded focus:ring-2"
               style={{ accentColor: '#5D4E3E' }}
             />
@@ -154,39 +190,72 @@ export default function DateTimePicker({
             </label>
           </div>
 
-          {/* 시간 선택 */}
+          {/* 시간 선택 - AM/PM + 직접 입력 */}
           {includeTime && (
             <div>
               <label className="text-xs font-bold mb-2 block" style={{ color: '#010D00' }}>
                 시간
               </label>
-              <select
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full px-3 py-2 rounded focus:outline-none text-sm font-medium"
-                style={{
-                  border: '2px solid #E5DCC8',
-                  backgroundColor: '#F2E8D5',
-                  color: '#010D00'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
-              >
-                {timeOptions.map(time => {
-                  const [hour, minute] = time.split(':').map(Number);
-                  const period = hour < 12 ? '오전' : '오후';
-                  const displayHour = hour % 12 || 12;
-                  const displayText = minute === 0 
-                    ? `${period} ${displayHour}시`
-                    : `${period} ${displayHour}시 ${minute}분`;
-                  
-                  return (
-                    <option key={time} value={time}>
-                      {displayText}
-                    </option>
-                  );
-                })}
-              </select>
+              <div className="flex items-center gap-2">
+                {/* AM/PM 선택 */}
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as 'AM' | 'PM')}
+                  className="px-3 py-2 rounded focus:outline-none text-sm font-medium"
+                  style={{
+                    border: '2px solid #E5DCC8',
+                    backgroundColor: '#F2E8D5',
+                    color: '#010D00',
+                    width: '80px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
+                >
+                  <option value="AM">오전</option>
+                  <option value="PM">오후</option>
+                </select>
+
+                {/* 시 입력 */}
+                <input
+                  type="text"
+                  value={hour}
+                  onChange={handleHourChange}
+                  placeholder="9"
+                  maxLength={2}
+                  className="px-3 py-2 rounded focus:outline-none text-sm font-medium text-center"
+                  style={{
+                    border: '2px solid #E5DCC8',
+                    backgroundColor: '#F2E8D5',
+                    color: '#010D00',
+                    width: '60px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
+                />
+                
+                <span className="text-sm font-bold" style={{ color: '#010D00' }}>:</span>
+
+                {/* 분 입력 */}
+                <input
+                  type="text"
+                  value={minute}
+                  onChange={handleMinuteChange}
+                  placeholder="00"
+                  maxLength={2}
+                  className="px-3 py-2 rounded focus:outline-none text-sm font-medium text-center"
+                  style={{
+                    border: '2px solid #E5DCC8',
+                    backgroundColor: '#F2E8D5',
+                    color: '#010D00',
+                    width: '60px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5DCC8'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F2E8D5'}
+                />
+              </div>
+              <p className="text-xs mt-2" style={{ color: '#8C8270' }}>
+                시: 1-12, 분: 0-59
+              </p>
             </div>
           )}
         </div>
