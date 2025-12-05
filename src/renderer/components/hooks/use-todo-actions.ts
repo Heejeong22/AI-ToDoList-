@@ -18,13 +18,13 @@ export function useTodoActions({
 }: UseTodoActionsProps) {
   
   // TODO 추가
-  const addTodo = async (parsed: ParsedTodo) => {
+  const addTodo = async (parsed: ParsedTodo, manualDueDate?: Date | null) => {
   setIsLoading(true);
 
   try {
     const createInput = {
     title: parsed.title,
-    dueDate: parsed.dueDate ?? null,
+    dueDate: manualDueDate ?? parsed.dueDate ?? null,
     alertTime: parsed.alertTime ?? null,
     priority: null,
     tags: undefined // 🔥 null 불가 → undefined로 변경

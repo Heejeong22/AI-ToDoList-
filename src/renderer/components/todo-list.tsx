@@ -13,6 +13,17 @@ import { useTodoFilters } from './hooks/use-todo-filters';
 import { useModals } from './hooks/use-modals';
 import { safeParseJSON } from '../../main/parser'; 
 
+const buildDueDateFromInput = (date: Date, time?: string) => {
+  const composed = new Date(date);
+  if (time) {
+    const [hours, minutes] = time.split(':').map(Number);
+    composed.setHours(hours, minutes, 0, 0);
+  } else {
+    composed.setHours(0, 0, 0, 0);
+  }
+  return composed;
+};
+
 export default function TodoList() {
   // 커스텀 훅으로 상태 관리 분리
   const {
@@ -202,7 +213,7 @@ export default function TodoList() {
             placeholder="할 일을 입력하세요..."
             maxLength={100}
             rows={1}
-            onSubmit={async (text) => {
+            onSubmit={async (text, dueDateInput, dueTime) => {
               try {
                 setIsLoading(true);
 
@@ -223,7 +234,9 @@ export default function TodoList() {
                 }
 
                 // 3) addTodo에 전체 객체 넘기기
-                addTodo(parsed);
+                const manualDueDate = buildDueDateFromInput(dueDateInput, dueTime);
+
+                await addTodo(parsed, manualDueDate);
 
               } catch (err) {
                 console.error(err);

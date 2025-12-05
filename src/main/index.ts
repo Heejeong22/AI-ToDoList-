@@ -8,6 +8,12 @@ import { setupAppHandlers } from './ipc/app/appHandlers'
 import * as Drizzle from './db/drizzle'
 import { runMigration } from './utils/migrate'
 import { setupGptAiHandlers } from './ipc/gpt/gptAiHandlers'
+import { setupNotificationHandlers } from './ipc/notification/notificationHandlers'
+import {
+  initializeNotificationScheduler,
+  stopNotificationScheduler,
+} from './notification/notificationScheduler'
+import { addNotificationFields } from './db/addNotificationFields'
 
 // 전역 타입 선언
 declare global {
@@ -30,6 +36,9 @@ app.whenReady().then(async () => {
     // 2) DB 초기화
     await Drizzle.initializeDatabase()
 
+    // 3) 알림 필드 추가 마이그레이션
+    await addNotificationFields()
+
     // Create the main window
     mainWindow = createWindow()
 
@@ -44,6 +53,10 @@ app.whenReady().then(async () => {
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
     setupGptAiHandlers(ipcMain)
+    setupNotificationHandlers(ipcMain)
+
+    // 알림 스케줄러 시작
+    initializeNotificationScheduler(mainWindow)
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()
@@ -64,6 +77,7 @@ app.whenReady().then(async () => {
 // before-quit 이벤트
 app.on('before-quit', () => {
   app.isQuitting = true
+  stopNotificationScheduler()
 })
 
 // window-all-closed 이벤트 수정

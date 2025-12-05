@@ -37,8 +37,10 @@ export async function updateTodo(id: number, updates: any) {
   }
 
   // alertTime을 직접 수정하는 경우도 문자열로 변환
-  if (updates.alertTime) {
+  if (updates.alertTime !== undefined) {
     updateData.alertTime = toYmdHm(updates.alertTime)
+    // alertTime 변경 시 notified 플래그 리셋 (재알림 가능하도록)
+    updateData.notified = 0
   }
 
   // updatedAt은 "지금"을 문자열(YYYY-MM-DD HH:MM)로 저장

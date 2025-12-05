@@ -1,7 +1,7 @@
-import { useState, useRef, KeyboardEvent, ChangeEvent } from 'react';
+import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from 'react';
 import DateTimePicker from './date-time-picker';
 import AlertModal from './alert-modal';
-import { getDateDisplayText, getTimeDisplayText } from '../utils/date-utils';
+import { getDateDisplayText, getTimeDisplayText, isSameDay } from '../utils/date-utils';
 
 interface TextInputProps {
   placeholder?: string;
@@ -24,6 +24,12 @@ export default function TextInput({
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [showAlert, setShowAlert] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!isSameDay(selectedDate, defaultDate)) {
+      setSelectedDate(defaultDate);
+    }
+  }, [defaultDate, selectedDate]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
