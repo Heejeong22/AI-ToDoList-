@@ -61,10 +61,7 @@ export interface CreateTodoInput {
 }
 
 export async function createTodo(todoData: CreateTodoInput) {
-
-  const { title, dueDate, dueTime, priority, tags } = todoData
-
-
+  const { title, category: inputCategory, dueDate, dueTime, priority, tags } = todoData
 
   // 1) 카테고리 결정
   //    - 우선 GPT/프론트에서 넘어온 category 사용
@@ -84,9 +81,8 @@ export async function createTodo(todoData: CreateTodoInput) {
   let alertTimeStr: string | null = null
 
   if (dueDateStr && dueTime) {  // ✅ dueTime이 있을 때만 alertTime 생성
-    const base = new Date(dueDate as any)
-    if (!Number.isNaN(base.getTime())) {
-
+    const base = parseToLocalDate(dueDate)
+    if (base && !Number.isNaN(base.getTime())) {
       base.setMinutes(base.getMinutes() - 5)
       alertTimeStr = toYmdHm(base)
     }

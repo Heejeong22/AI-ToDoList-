@@ -16,44 +16,45 @@ export function useTodoActions({
   mapDbTodoToUiTodo,
   showAlert,
 }: UseTodoActionsProps) {
-  
   // TODO 추가
-
-  const addTodo = async (parsed: ParsedTodo, manualDueDate?: Date | null, dueTime?: string | null) => {
-  setIsLoading(true);
-
-  try {
-    const createInput = {
-    title: parsed.title,
-    dueDate: manualDueDate ?? parsed.dueDate ?? null,
-    dueTime: dueTime ?? null,  // ✅ 시간이 설정된 경우에만 전달
-    alertTime: parsed.alertTime ?? null,
-    priority: null,
-    tags: undefined // 🔥 null 불가 → undefined로 변경
-  };
-
+  const addTodo = async (
+    parsed: ParsedTodo,
+    manualDueDate?: Date | null,
+    dueTime?: string | null
+  ) => {
+    setIsLoading(true);
 
     try {
-      // GPT가 분석한 title / category / dueDate / alertTime을 그대로 메인으로 전달
+      const hasManualTime = !!dueTime;
+
+      // GPT가 분석한 title / category / dueDate / alertTime + 수동 입력 시간을 메인으로 전달
       const createInput = {
         title: parsed.title,
         category: parsed.category ?? null,
-        dueDate: parsed.dueDate ?? null,
+        // 시간이 직접 선택된 경우에만 manualDueDate 우선 적용
+        // 그 외에는 GPT가 분석한 dueDate를 그대로 사용
+        dueDate: hasManualTime
+          ? (manualDueDate ?? parsed.dueDate ?? null)
+          : (parsed.dueDate ?? manualDueDate ?? null),
+        dueTime: hasManualTime ? dueTime : null,
         alertTime: parsed.alertTime ?? null,
         priority: null,
-        // 🔥 null 불가 → undefined로 유지
+        // null 불가 → undefined로 유지
         tags: undefined,
       };
 
       const response = await window.api.todo.create(createInput);
 
       if (!response.success || !response.data) {
-        showAlert("저장 실패", "할 일 저장에 실패했습니다.");
+        showAlert('저장 실패', '할 일 저장에 실패했습니다.');
         return;
       }
 
       const created = mapDbTodoToUiTodo(response.data);
       setTodos((prev) => [...prev, created]);
+    } catch (error) {
+      console.error('Error creating todo:', error);
+      showAlert('오류 발생', '할 일 저장 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
