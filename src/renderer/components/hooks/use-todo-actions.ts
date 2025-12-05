@@ -19,30 +19,33 @@ export function useTodoActions({
   
   // TODO 추가
   const addTodo = async (parsed: ParsedTodo) => {
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const createInput = {
-    title: parsed.title,
-    dueDate: parsed.dueDate ?? null,
-    alertTime: parsed.alertTime ?? null,
-    priority: null,
-    tags: undefined // 🔥 null 불가 → undefined로 변경
-  };
+    try {
+      // GPT가 분석한 title / category / dueDate / alertTime을 그대로 메인으로 전달
+      const createInput = {
+        title: parsed.title,
+        category: parsed.category ?? null,
+        dueDate: parsed.dueDate ?? null,
+        alertTime: parsed.alertTime ?? null,
+        priority: null,
+        // 🔥 null 불가 → undefined로 유지
+        tags: undefined,
+      };
 
-    const response = await window.api.todo.create(createInput);
+      const response = await window.api.todo.create(createInput);
 
-    if (!response.success || !response.data) {
-      showAlert("저장 실패", "할 일 저장에 실패했습니다.");
-      return;
+      if (!response.success || !response.data) {
+        showAlert("저장 실패", "할 일 저장에 실패했습니다.");
+        return;
+      }
+
+      const created = mapDbTodoToUiTodo(response.data);
+      setTodos((prev) => [...prev, created]);
+    } finally {
+      setIsLoading(false);
     }
-
-    const created = mapDbTodoToUiTodo(response.data);
-    setTodos((prev) => [...prev, created]);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   // 완료 상태 토글

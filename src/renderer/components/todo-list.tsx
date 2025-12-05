@@ -5,7 +5,7 @@ import HelpButton from './common/help-button';
 import AlertModal from './common/alert-modal';
 import TutorialModal from './common/tutorial-modal';
 import LoadingModal from './common/loading-modal';
-import { CATEGORIES } from './constants';
+import { CATEGORIES, SCHEDULE_CATEGORY } from './constants';
 import { getToday, getDateDisplayText, isSameDay } from './utils/date-utils';
 import { useTodoState } from './hooks/use-todo-state';
 import { useTodoActions } from './hooks/use-todo-actions';
@@ -47,7 +47,7 @@ export default function TodoList() {
   });
 
   // 필터링 & 통계
-  const { getTodosByCategory, getStats } = useTodoFilters({
+  const { getTodosByCategory, getScheduledTodos, getStats } = useTodoFilters({
     todos,
     selectedDate,
   });
@@ -85,6 +85,7 @@ export default function TodoList() {
   };
 
   const { totalTodos, completedTodos } = getStats();
+  const scheduledTodos = getScheduledTodos();
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#FEFDFB' }}>
@@ -170,6 +171,22 @@ export default function TodoList() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* 스케줄(시간 있는 일정) 블록 */}
+              <CategorySection
+                categoryValue={SCHEDULE_CATEGORY.value}
+                categoryLabel={SCHEDULE_CATEGORY.label}
+                categoryIcon={SCHEDULE_CATEGORY.icon}
+                todos={scheduledTodos}
+                onToggleComplete={toggleComplete}
+                onTogglePin={togglePin}
+                onDelete={deleteTodo}
+                onEdit={editTodo}
+                selectedDate={selectedDate}
+                isExpanded={expandedCategories.has(SCHEDULE_CATEGORY.value)}
+                onToggleExpand={toggleCategoryExpand}
+              />
+
+              {/* 실제 카테고리 블록들 */}
               {CATEGORIES.map(category => {
                 const categoryTodos = getTodosByCategory(category.value);
                 
