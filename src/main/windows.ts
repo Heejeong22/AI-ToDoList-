@@ -7,9 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export function createWindow(): BrowserWindow {
   // Create the browser window
   const mainWindow = new BrowserWindow({
-    width: 1200,
+    width: 1000,
     height: 800,
-    minWidth: 800,
+    minWidth: 360,
     minHeight: 600,
     webPreferences: {
       nodeIntegration: false,
@@ -36,17 +36,18 @@ export function createWindow(): BrowserWindow {
   })
 
   // OS별 창 관리 로직
-  // macOS: X 버튼 클릭 시 hide (종료 안 함)
+  // 트레이가 있으므로 X 버튼 클릭 시 hide (양쪽 플랫폼 모두)
   mainWindow.on('close', (event) => {
-    if (process.platform === 'darwin' && !app.isQuitting) {
+    if (!app.isQuitting) {
       event.preventDefault()
       mainWindow.hide()
-      if (app.dock) {
+
+      // macOS: Dock 아이콘도 숨김
+      if (process.platform === 'darwin' && app.dock) {
         app.dock.hide()
       }
     }
-    // Windows/Linux: 기본 동작 유지 (종료됨)
-    // 나중에 트레이 구현 시 수정 예정
+    // app.isQuitting이 true면 정상 종료
   })
 
   // macOS Dock 관리

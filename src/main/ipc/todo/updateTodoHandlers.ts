@@ -2,11 +2,46 @@ import { db } from '../../db/drizzle'
 import { todos } from '../../db/schema'
 import { eq } from 'drizzle-orm'
 
-// Date → "YYYY-MM-DD HH:MM" 문자열로 변환
-const toYmdHm = (value: any | undefined | null): string | null => {
+// 공통: 값 → 로컬 Date 객체로 변환
+const parseToLocalDate = (value: any | undefined | null): Date | null => {
   if (!value) return null
-  const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return null
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value
+  }
+
+  if (typeof value === 'string') {
+    const str = value.trim()
+
+    // "YYYY-MM-DDTHH:MM(:SS)[.sss][Z]" 또는 "YYYY-MM-DD HH:MM" 직접 파싱
+    const isoMatch =
+      /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?Z?$/.exec(str)
+    if (isoMatch) {
+      const [, y, m, day, h, min, s] = isoMatch
+      return new Date(
+        Number(y),
+        Number(m) - 1,
+        Number(day),
+        Number(h),
+        Number(min),
+        s ? Number(s) : 0,
+        0,
+      )
+    }
+
+    const tmp = new Date(str)
+    return Number.isNaN(tmp.getTime()) ? null : tmp
+  }
+
+  const tmp = new Date(value)
+  return Number.isNaN(tmp.getTime()) ? null : tmp
+}
+
+// Date / 문자열 → 로컬 기준 "YYYY-MM-DD HH:MM" 문자열로 변환
+const toYmdHm = (value: any | undefined | null): string | null => {
+  const d = parseToLocalDate(value)
+  if (!d) return null
+
   const pad = (v: number) => v.toString().padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
     d.getHours(),
@@ -28,8 +63,8 @@ export async function updateTodo(id: number, updates: any) {
     updateData.dueDate = dueStr
 
     if (updates.alertTime === undefined && dueStr) {
-      const base = new Date(updates.dueDate as any)
-      if (!Number.isNaN(base.getTime())) {
+      const base = parseToLocalDate(updates.dueDate)
+      if (base) {
         base.setMinutes(base.getMinutes() - 5)
         updateData.alertTime = toYmdHm(base)
       }
@@ -37,8 +72,10 @@ export async function updateTodo(id: number, updates: any) {
   }
 
   // alertTime을 직접 수정하는 경우도 문자열로 변환
-  if (updates.alertTime) {
+  if (updates.alertTime !== undefined) {
     updateData.alertTime = toYmdHm(updates.alertTime)
+    // alertTime 변경 시 notified 플래그 리셋 (재알림 가능하도록)
+    updateData.notified = 0
   }
 
   // updatedAt은 "지금"을 문자열(YYYY-MM-DD HH:MM)로 저장

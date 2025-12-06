@@ -1,12 +1,19 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { createWindow } from './windows'
 import { registerShortcuts } from './shortcuts'
+import { createTray } from './tray'
 import { setupTodoHandlers } from './ipc/todo/todoHandlers'
 import { setupAiHandlers } from './ipc/ai/aiHandlers'
 import { setupAppHandlers } from './ipc/app/appHandlers'
 import * as Drizzle from './db/drizzle'
 import { runMigration } from './utils/migrate'
 import { setupGptAiHandlers } from './ipc/gpt/gptAiHandlers'
+import { setupNotificationHandlers } from './ipc/notification/notificationHandlers'
+import {
+  initializeNotificationScheduler,
+  stopNotificationScheduler,
+} from './notification/notificationScheduler'
+import { addNotificationFields } from './db/addNotificationFields'
 
 // 전역 타입 선언
 declare global {
@@ -29,8 +36,14 @@ app.whenReady().then(async () => {
     // 2) DB 초기화
     await Drizzle.initializeDatabase()
 
+    // 3) 알림 필드 추가 마이그레이션
+    await addNotificationFields()
+
     // Create the main window
     mainWindow = createWindow()
+
+    // Create system tray
+    createTray(mainWindow)
 
     // Register global shortcuts
     registerShortcuts(mainWindow)
@@ -39,7 +52,11 @@ app.whenReady().then(async () => {
     setupTodoHandlers(ipcMain)
     setupAiHandlers(ipcMain)
     setupAppHandlers(ipcMain)
-    setupGptAiHandlers(ipcMain) 
+    setupGptAiHandlers(ipcMain)
+    setupNotificationHandlers(ipcMain)
+
+    // 알림 스케줄러 시작
+    initializeNotificationScheduler(mainWindow)
   } catch (error) {
     console.error('Failed to initialize app:', error)
     app.quit()
@@ -60,20 +77,18 @@ app.whenReady().then(async () => {
 // before-quit 이벤트
 app.on('before-quit', () => {
   app.isQuitting = true
+  stopNotificationScheduler()
 })
 
 // window-all-closed 이벤트 수정
 app.on('window-all-closed', () => {
-  // macOS: 창 닫아도 앱은 계속 실행 (Dock에서 숨김)
-  // 완전 종료는 Cmd+Q나 메뉴에서만 가능
+  // 트레이가 있으므로 창이 모두 닫혀도 앱은 계속 실행
+  // macOS, Windows, Linux 모두 트레이에서 실행 유지
+  // 완전 종료는 트레이 메뉴에서 "종료" 선택 시에만
   if (app.isQuitting) {
     app.quit()
   }
-  // Windows/Linux: 창 닫으면 앱 종료 (기본 동작)
-  // 나중에 트레이 추가 시 macOS와 동일하게 변경
-  else if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // 트레이가 있으므로 창 없이도 백그라운드에서 실행
 })
 
 // Security: Prevent new window creation

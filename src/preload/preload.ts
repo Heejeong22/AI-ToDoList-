@@ -1,4 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { CreateTodoInput } from 'src/main/ipc/todo/createTodoHandlers';
+
 
 // Type definitions for the exposed API
 interface Todo {
@@ -27,7 +29,7 @@ const api = {
     getAll: (): Promise<ApiResponse<Todo[]>> =>
       ipcRenderer.invoke('todo:getAll'),
 
-    create: (todo: Todo): Promise<ApiResponse<Todo>> =>
+    create: (todo: CreateTodoInput): Promise<ApiResponse<any>> =>
       ipcRenderer.invoke('todo:create', todo),
 
     update: (id: number, updates: Partial<Todo>): Promise<ApiResponse<Todo>> =>
@@ -115,6 +117,18 @@ const api = {
       ipcRenderer.invoke('app:quit'),
   },
 
+  // 알림 관련 API
+  notification: {
+    test: (message?: string): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:test', message),
+
+    checkNow: (): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:checkNow'),
+
+    resetNotified: (todoId: number): Promise<ApiResponse> =>
+      ipcRenderer.invoke('notification:resetNotified', todoId),
+  },
+
   // 이벤트 리스너
   on: (channel: string, callback: (...args: any[]) => void) => {
     // 허용된 채널만 리스닝 가능
@@ -123,7 +137,9 @@ const api = {
       'shortcut:ai-analysis',
       'shortcut:search',
       'shortcut:quick-add',
-      'shortcut:escape'
+      'shortcut:escape',
+      'notification:clicked',
+      'notification:log'
     ]
 
     if (allowedChannels.includes(channel)) {
