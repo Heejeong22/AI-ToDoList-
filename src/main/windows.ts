@@ -7,9 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export function createWindow(): BrowserWindow {
   // Create the browser window
   const mainWindow = new BrowserWindow({
-    width: 1200,
+    width: 1000,
     height: 800,
-    minWidth: 800,
+    minWidth: 360,
     minHeight: 600,
     webPreferences: {
       nodeIntegration: false,

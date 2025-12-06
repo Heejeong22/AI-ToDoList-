@@ -54,7 +54,7 @@ export default function TodoItem({
         exit={{ opacity: 0, scale: 0.95 }}
         whileHover={{ scale: 1.01, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.1)" }}
         whileTap={{ scale: 0.98 }}
-        className={`group relative flex items-center gap-3 py-3 px-3.5 mb-2.5 rounded-2xl transition-colors duration-200 border-1.2 ${completed
+        className={`group relative flex items-center gap-3 py-2 px-3 mb-1.5 rounded-2xl transition-colors duration-200 border-1.2 ${completed
           ? 'bg-bg-secondary/50 border-transparent opacity-80'
           : 'bg-white dark:bg-zinc-800 border-black dark:border-transparent shadow-sm hover:border-black'
           }`}
@@ -64,7 +64,7 @@ export default function TodoItem({
           onClick={() => onToggleComplete(id)}
           disabled={isEditing}
           className={`flex-shrink-0 w-[18px] h-[18px] rounded-[6px] flex items-center justify-center transition-all duration-200 ${completed
-            ? 'bg-black border-1.2 border-black text-white dark:bg-white dark:border-white dark:text-black shadow-sm'
+            ? 'bg-zinc-600 border-1.2 border-zinc-600 text-white dark:bg-zinc-400 dark:border-zinc-400 dark:text-zinc-900 shadow-sm'
             : 'bg-white dark:bg-transparent border-1.2 border-black dark:border-white/30 hover:bg-black/5'
             }`}
         >
@@ -79,7 +79,7 @@ export default function TodoItem({
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-transparent border-none p-0 -ml-[1px] focus:outline-none focus:ring-0 text-text-primary font-medium text-base leading-snug"
+                className="w-full bg-transparent border-none p-0 -ml-[1px] focus:outline-none focus:ring-0 text-text-primary font-normal text-base leading-snug"
                 autoFocus
                 maxLength={100}
                 spellCheck={false}
@@ -87,7 +87,7 @@ export default function TodoItem({
               />
             ) : (
               <span
-                className={`text-base leading-snug cursor-text transition-colors font-medium ${completed ? 'line-through text-text-tertiary' : 'text-text-primary'
+                className={`text-base leading-snug cursor-text transition-colors font-normal ${completed ? 'line-through text-text-tertiary' : 'text-text-primary'
                   }`}
                 onDoubleClick={() => !completed && setIsEditing(true)}
               >
@@ -110,48 +110,48 @@ export default function TodoItem({
         </div>
 
         {/* Action Buttons */}
-        <div className={`flex items-center gap-1 transition-opacity absolute right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-700/90 backdrop-blur-sm shadow-md border border-gray-200 dark:border-white/10 rounded-xl p-1 z-20 ${isEditing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        <div className={`flex items-center gap-1 transition-opacity absolute right-2 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-700/90 backdrop-blur-sm shadow-md border border-gray-200 dark:border-white/10 rounded-2xl p-1 z-20 ${isEditing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}>
           {isEditing ? (
             <>
               <button
                 onClick={handleSaveEdit}
-                className="p-1.5 text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-lg transition-colors"
+                className="p-1 text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-xl transition-colors"
                 title="Save"
               >
-                <Check size={14} strokeWidth={2.5} />
+                <Check size={13} strokeWidth={2.5} />
               </button>
               <button
                 onClick={handleCancelEdit}
-                className="p-1.5 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                className="p-1 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-xl transition-colors"
                 title="Cancel"
               >
-                <X size={14} strokeWidth={2.5} />
+                <X size={13} strokeWidth={2.5} />
               </button>
             </>
           ) : (
             <>
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-1.5 text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-lg transition-colors"
+                className="p-1 text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 rounded-xl transition-colors"
                 title="Edit"
               >
-                <Edit2 size={14} strokeWidth={2} />
+                <Edit2 size={13} strokeWidth={2} />
               </button>
               <button
                 onClick={() => onTogglePin(id)}
-                className={`p-1.5 rounded-lg transition-colors ${isPinned ? 'text-orange-500 bg-orange-50 dark:bg-orange-500/20' : 'text-text-secondary hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/20'
+                className={`p-1 rounded-xl transition-colors ${isPinned ? 'text-orange-500 bg-orange-50 dark:bg-orange-500/20' : 'text-text-secondary hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/20'
                   }`}
                 title={isPinned ? 'Unpin' : 'Pin'}
               >
-                <Pin size={14} strokeWidth={2} />
+                <Pin size={13} strokeWidth={2} />
               </button>
               <button
                 onClick={() => onDelete(id)}
-                className="p-1.5 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                className="p-1 text-text-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-xl transition-colors"
                 title="Delete"
               >
-                <Trash2 size={14} strokeWidth={2} />
+                <Trash2 size={13} strokeWidth={2} />
               </button>
             </>
           )}

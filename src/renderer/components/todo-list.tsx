@@ -109,8 +109,8 @@ export default function TodoList({ isDarkMode, toggleTheme }: TodoListProps) {
   return (
     <div className="flex flex-col h-full bg-bg-primary dark:bg-bg-primary">
       {/* Header */}
-      <header className="px-6 py-6 border-b border-border/40 shrink-0 bg-bg-tertiary/80 dark:bg-zinc-800/90 backdrop-blur-md sticky top-0 z-10 transition-all">
-        <div className="flex items-center justify-between mb-6">
+      <header className="px-6 py-4 border-b border-border/40 shrink-0 bg-bg-tertiary/80 dark:bg-zinc-800/90 backdrop-blur-md sticky top-0 z-10 transition-all">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-3xl font-bold tracking-tight text-text-primary flex items-baseline gap-2">
             ToDo
             <span className="text-sm font-medium text-text-tertiary">
@@ -195,7 +195,7 @@ export default function TodoList({ isDarkMode, toggleTheme }: TodoListProps) {
                 <p className="text-sm font-medium">할 일이 없습니다. 아래에서 추가해보세요!</p>
               </div>
             ) : (
-              <div className="space-y-6 pb-6">
+              <div className="space-y-4 pb-6">
                 {/* Scheduled Block */}
                 <CategorySection
                   categoryValue={SCHEDULE_CATEGORY.value}
@@ -212,7 +212,7 @@ export default function TodoList({ isDarkMode, toggleTheme }: TodoListProps) {
                 />
 
                 {/* Categories */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {CATEGORIES.map(category => {
                     const categoryTodos = getTodosByCategory(category.value);
                     if (categoryTodos.length === 0) return null;

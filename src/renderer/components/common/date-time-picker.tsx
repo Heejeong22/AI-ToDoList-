@@ -201,7 +201,7 @@ export default function DateTimePicker({
                             type="number"
                             value={hour}
                             onChange={(e) => setHour(e.target.value)}
-                            className="w-full bg-transparent text-center text-2xl font-bold py-2 focus:outline-none text-text-primary placeholder:text-text-tertiary"
+                            className="w-full bg-transparent text-center text-2xl font-bold py-2 focus:outline-none text-text-primary placeholder:text-text-tertiary dark:[color-scheme:dark]"
                             placeholder="HH"
                             min={0}
                             max={23}
@@ -214,7 +214,7 @@ export default function DateTimePicker({
                             type="number"
                             value={minute}
                             onChange={(e) => setMinute(e.target.value)}
-                            className="w-full bg-transparent text-center text-2xl font-bold py-2 focus:outline-none text-text-primary placeholder:text-text-tertiary"
+                            className="w-full bg-transparent text-center text-2xl font-bold py-2 focus:outline-none text-text-primary placeholder:text-text-tertiary dark:[color-scheme:dark]"
                             placeholder="MM"
                             min={0}
                             max={59}

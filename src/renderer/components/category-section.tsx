@@ -42,39 +42,51 @@ export default function CategorySection({
   // Icon Mapping
   const getIcon = (val: string) => {
     switch (val) {
-      case 'work': return <Briefcase size={20} strokeWidth={2.5} />;
-      case 'personal': return <User size={20} strokeWidth={2.5} />;
-      case 'study': return <BookOpen size={20} strokeWidth={2.5} />;
-      case 'health': return <Heart size={20} strokeWidth={2.5} />;
-      case 'productivity': return <CheckCircle2 size={20} strokeWidth={2.5} />;
-      case 'schedule': return <Calendar size={20} strokeWidth={2.5} />;
-      default: return <MoreHorizontal size={20} strokeWidth={2.5} />;
+      case 'work': return <Briefcase size={18} strokeWidth={2.5} />;
+      case 'personal': return <User size={18} strokeWidth={2.5} />;
+      case 'study': return <BookOpen size={18} strokeWidth={2.5} />;
+      case 'health': return <Heart size={18} strokeWidth={2.5} />;
+      case 'productivity': return <CheckCircle2 size={18} strokeWidth={2.5} />;
+      case 'schedule': return <Calendar size={18} strokeWidth={2.5} />;
+      default: return <MoreHorizontal size={18} strokeWidth={2.5} />;
     }
   };
 
+  const completionRate = todos.length > 0 ? (todos.filter(t => t.completed).length / todos.length) * 100 : 0;
+
   return (
-    <div className="mb-4">
+    <div className="mb-3">
       {/* Header with Pastel Theme */}
       <button
         onClick={() => onToggleExpand(categoryValue)}
         className={cn(
-          "flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all duration-200 group border-1.2 relative",
+          "flex items-center gap-3 w-full px-3 py-2 rounded-2xl transition-all duration-200 group border-1.2 relative overflow-hidden",
           // Light: border-black (retro 1.2px). Dark: transparent.
           "border-black dark:border-transparent",
           themeClass,
           "shadow-sm hover:shadow-md hover:-translate-y-0.5"
         )}
       >
+        {/* Progress Background */}
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-black/5 dark:bg-white/5" />
+        {/* Progress Value */}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${completionRate}%` }}
+          transition={{ duration: 0.8, ease: "circOut" }}
+          className="absolute bottom-0 left-0 h-1 bg-black/20 dark:bg-white/30"
+        />
+
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.2 }}
-          className="opacity-70 group-hover:opacity-100"
+          className="opacity-70 group-hover:opacity-100 relative z-10"
         >
-          <ChevronRight size={20} strokeWidth={2.5} />
+          <ChevronRight size={18} strokeWidth={2.5} />
         </motion.div>
 
-        <div className="flex items-center gap-3">
-          <span className="p-2 rounded-xl bg-bg-secondary text-text-secondary">
+        <div className="flex items-center gap-3 relative z-10">
+          <span className="p-1.5 rounded-xl bg-bg-secondary text-text-secondary">
             {getIcon(categoryValue)}
           </span>
           <h2 className="text-base font-semibold tracking-tight opacity-90 capitalize">
@@ -83,7 +95,7 @@ export default function CategorySection({
         </div>
 
         <span className={cn(
-          "ml-auto text-xs font-semibold px-2.5 py-1 rounded-full",
+          "ml-auto text-xs font-semibold px-2.5 py-1 rounded-full relative z-10",
           "bg-bg-secondary text-text-secondary"
         )}>
           {todoCount}
@@ -98,9 +110,8 @@ export default function CategorySection({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden"
           >
-            <div className="px-2 pt-2 pb-1 space-y-2">
+            <div className="px-1 pt-1.5 pb-1 space-y-1">
               {todos.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -111,7 +122,7 @@ export default function CategorySection({
                 </motion.div>
               ) : (
                 <motion.div
-                  className="space-y-2.5"
+                  className="space-y-1.5"
                   initial="hidden"
                   animate="visible"
                   variants={{

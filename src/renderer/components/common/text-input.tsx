@@ -94,7 +94,7 @@ export default function TextInput({
 
   return (
     <>
-      <div className="bg-white dark:bg-zinc-800 border-1.2 border-black dark:border-zinc-700 focus-within:shadow-xl focus-within:-translate-y-[1px] transition-all duration-200 rounded-2xl shadow-sm p-1">
+      <div className="bg-white dark:bg-zinc-800 border-1.2 border-black dark:border-zinc-700 rounded-2xl shadow-sm p-1 transition-all duration-300 ease-out focus-within:scale-[1.02] focus-within:-translate-y-1 focus-within:shadow-2xl focus-within:border-black dark:focus-within:border-white">
         <textarea
           ref={textareaRef}
           value={inputValue}
