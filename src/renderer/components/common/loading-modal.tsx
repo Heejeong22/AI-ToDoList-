@@ -1,42 +1,42 @@
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+
 interface LoadingModalProps {
   isOpen: boolean;
   message?: string;
 }
 
-export default function LoadingModal({ 
-  isOpen, 
-  message = '처리 중입니다...' 
+export default function LoadingModal({
+  isOpen,
+  message = '처리 중...'
 }: LoadingModalProps) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div
-        className="rounded-lg shadow-2xl w-80 overflow-hidden"
-        style={{
-          backgroundColor: '#FEFDFB',
-          border: '2px solid #E5DCC8',
-        }}
-      >
-        {/* Content */}
-        <div className="px-6 py-8 flex flex-col items-center" style={{ backgroundColor: '#FEFDFB' }}>
-          {/* 로딩 스피너 */}
-          <div className="relative w-16 h-16 mb-6">
-            <div
-              className="absolute inset-0 rounded-full animate-spin"
-              style={{
-                border: '4px solid #E5DCC8',
-                borderTopColor: '#5D4E3E',
-              }}
-            />
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          />
 
-          {/* 메시지 */}
-          <p className="text-base font-medium text-center" style={{ color: '#4A3F35' }}>
-            {message}
-          </p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-bg-primary rounded-2xl shadow-2xl border border-border p-8 flex flex-col items-center gap-4"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <Loader2 size={32} className="text-primary" />
+            </motion.div>
+            <p className="text-text-primary font-medium">{message}</p>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

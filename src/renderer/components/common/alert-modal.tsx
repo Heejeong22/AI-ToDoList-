@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -15,7 +16,6 @@ export default function AlertModal({
   confirmText = '확인',
   onConfirm,
 }: AlertModalProps) {
-  // ESC 키 또는 Enter 키로 닫기
   useEffect(() => {
     if (!isOpen) return;
 
@@ -29,68 +29,45 @@ export default function AlertModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onConfirm]);
 
-  if (!isOpen) return null;
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onConfirm();
-    }
-  };
-
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-      onClick={handleOverlayClick}
-    >
-      <div
-        className="rounded-lg shadow-2xl w-96 overflow-hidden"
-        style={{
-          backgroundColor: '#FEFDFB',
-          border: '2px solid #E5DCC8',
-        }}
-      >
-        {/* Header */}
-        <div
-          className="px-5 py-4"
-          style={{
-            borderBottom: '2px solid #E5DCC8',
-            backgroundColor: '#F2E8D5',
-          }}
-        >
-          <h3 className="text-lg font-bold" style={{ color: '#010D00' }}>
-            {title}
-          </h3>
-        </div>
-
-        {/* Content */}
-        <div className="px-5 py-6" style={{ backgroundColor: '#FEFDFB' }}>
-          <p className="text-base" style={{ color: '#4A3F35', lineHeight: '1.6' }}>
-            {message}
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div
-          className="px-5 py-4 flex justify-center"
-          style={{
-            borderTop: '2px solid #E5DCC8',
-          }}
-        >
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onConfirm}
-            className="px-8 py-2 text-sm rounded transition-colors font-bold"
-            style={{
-              backgroundColor: '#5D4E3E',
-              color: '#FEFDFB',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4A3F35')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#5D4E3E')}
-            autoFocus
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border-1.2 border-black dark:border-transparent overflow-hidden"
           >
-            {confirmText}
-          </button>
+            <div className="p-6 text-center">
+              <h3 className="text-xl font-bold text-text-primary mb-2 tracking-tight">
+                {title}
+              </h3>
+              <p className="text-text-secondary leading-relaxed font-medium">
+                {message}
+              </p>
+            </div>
+
+            <div className="px-6 py-4 bg-bg-secondary/30 flex justify-center border-t border-border/50">
+              <button
+                onClick={onConfirm}
+                className="w-full px-4 py-2.5 text-sm font-bold rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 transition-all"
+                autoFocus
+              >
+                {confirmText}
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

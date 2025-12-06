@@ -1,3 +1,5 @@
+import { ChevronsDown, ChevronsUp } from 'lucide-react';
+
 interface ExpandCollapseButtonProps {
   expandedCategories: Set<string>;
   totalCategories: number;
@@ -14,21 +16,13 @@ export default function ExpandCollapseButton({
   return (
     <button
       onClick={onToggleAll}
-      className="p-2 hover:bg-bg-hover rounded transition-colors text-text-primary border border-border"
-      title={hasAnyExpanded ? '모두 축소' : '모두 확장'}
+      className="p-2.5 rounded-xl bg-transparent text-text-secondary hover:bg-white dark:hover:bg-white/10 hover:text-text-primary transition-all active:scale-95"
+      title={hasAnyExpanded ? 'Collapse All' : 'Expand All'}
     >
       {hasAnyExpanded ? (
-        // 축소 아이콘
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" transform="rotate(90 12 12)" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19l7-7-7-7" transform="rotate(90 12 12)" />
-        </svg>
+        <ChevronsUp size={20} strokeWidth={2.5} />
       ) : (
-        // 확장 아이콘
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 9l7 7 7-7" />
-        </svg>
+        <ChevronsDown size={20} strokeWidth={2.5} />
       )}
     </button>
   );
