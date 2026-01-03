@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
 import TodoList from './components/todo-list';
 
 function App() {

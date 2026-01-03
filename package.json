@@ -11,6 +11,7 @@
     "electron": "electron .",
     "electron-main:build": "vite build --config electron.vite.config.ts",
     "build": "npm run build:vite && npm run electron-main:build && electron-builder",
+    "build:windows": "npm run build:vite && npm run electron-main:build && electron-builder --windows",
     "build:vite": "tsc && vite build",
     "build:electron": "electron-builder",
     "db:generate": "drizzle-kit generate:sqlite",
@@ -52,10 +53,11 @@
   "dependencies": {
     "better-sqlite3": "^12.4.6",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.7",
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.556.0",
-    "openai": "^6.10.0",
+    "openai": "^6.15.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0"
@@ -68,13 +70,22 @@
     },
     "files": [
       "dist-electron",
-      "dist"
+      "dist",
+      ".env"
+    ],
+    "extraResources": [
+      {
+        "from": ".env",
+        "to": ".env"
+      }
     ],
     "mac": {
       "category": "public.app-category.productivity"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
     },
     "linux": {
       "target": "AppImage"
