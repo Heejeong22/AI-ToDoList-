@@ -13,6 +13,13 @@ const parseToLocalDate = (value: any | undefined | null): Date | null => {
   if (typeof value === 'string') {
     const str = value.trim()
 
+    // "YYYY-MM-DD" (주의: new Date("YYYY-MM-DD")는 UTC로 해석되어 날짜가 하루 밀릴 수 있음)
+    const ymdMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str)
+    if (ymdMatch) {
+      const [, y, m, day] = ymdMatch
+      return new Date(Number(y), Number(m) - 1, Number(day), 0, 0, 0, 0)
+    }
+
     // "YYYY-MM-DDTHH:MM(:SS)[.sss][Z]" 또는 "YYYY-MM-DD HH:MM" 직접 파싱
     const isoMatch =
       /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?Z?$/.exec(str)
