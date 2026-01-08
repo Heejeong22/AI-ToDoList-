@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Trash2, Edit2, Pin, X, Save, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Check, Trash2, Edit2, Pin, X, Clock } from 'lucide-react';
 import AlertModal from './alert-modal';
 import { TodoItemProps } from '../types';
 import { getTimeDisplayText } from '../utils/date-utils';

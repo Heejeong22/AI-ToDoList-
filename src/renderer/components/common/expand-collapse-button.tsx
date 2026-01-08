@@ -8,7 +8,6 @@ interface ExpandCollapseButtonProps {
 
 export default function ExpandCollapseButton({
   expandedCategories,
-  totalCategories,
   onToggleAll
 }: ExpandCollapseButtonProps) {
   const hasAnyExpanded = expandedCategories.size > 0;

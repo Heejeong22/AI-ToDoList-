@@ -10,13 +10,32 @@ const mapDbTodoToUiTodo = (dbTodo: any): Todo => {
     if (typeof value === 'number') {
       return new Date(value * 1000);
     }
-    const str = String(value);
-    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(str)) {
-      const iso = str.replace(' ', 'T');
-      const parsed = new Date(iso);
-      if (!Number.isNaN(parsed.getTime())) return parsed;
+
+    const str = String(value).trim();
+
+    // "YYYY-MM-DD"는 브라우저/런타임에 따라 UTC로 파싱되어 날짜가 하루 밀릴 수 있어 수동 파싱
+    const ymdMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+    if (ymdMatch) {
+      const [, y, m, d] = ymdMatch;
+      return new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
     }
-    const parsed = new Date(value);
+
+    // "YYYY-MM-DD HH:MM" (DB 저장 포맷)
+    const ymdHmMatch = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(str);
+    if (ymdHmMatch) {
+      const [, y, m, d, hh, mm] = ymdHmMatch;
+      return new Date(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), 0, 0);
+    }
+
+    // "YYYY-MM-DDTHH:MM(:SS)[.sss][Z]?" (AI/기타 입력)
+    const isoMatch =
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?Z?$/.exec(str);
+    if (isoMatch) {
+      const [, y, m, d, hh, mm, ss] = isoMatch;
+      return new Date(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), ss ? Number(ss) : 0, 0);
+    }
+
+    const parsed = new Date(str);
     if (!Number.isNaN(parsed.getTime())) return parsed;
     return getToday();
   };

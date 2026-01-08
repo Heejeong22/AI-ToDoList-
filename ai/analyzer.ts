@@ -2,7 +2,19 @@
 
 import OpenAI from "openai";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+import { app } from "electron";
+
+// 프로덕션 빌드에서도 .env 파일을 찾을 수 있도록 경로 설정
+if (app.isPackaged) {
+  // 프로덕션 빌드: resources 폴더에서 .env 찾기
+  const envPath = path.join(process.resourcesPath, '.env');
+  console.log('🔍 Loading .env from:', envPath);
+  dotenv.config({ path: envPath });
+} else {
+  // 개발 모드: 프로젝트 루트에서 .env 찾기
+  dotenv.config();
+}
 
 import { safeParseJSON } from "../src/main/parser";
 import { createSystemPrompt } from "./prompt";

@@ -1,4 +1,3 @@
-import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Briefcase, User, BookOpen, Heart, CheckCircle2, MoreHorizontal, Calendar } from 'lucide-react';
 import TodoItem from './common/todo-item';
@@ -10,26 +9,14 @@ function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
-// Map categories to pastel themes defined in tailwind.config.js
-const categoryThemes: Record<string, string> = {
-  schedule: 'bg-pastel-blue text-ptext-blue dark:bg-opacity-20',
-  study: 'bg-pastel-purple text-ptext-purple dark:bg-opacity-20',
-  'self-dev': 'bg-pastel-green text-ptext-green dark:bg-opacity-20',
-  health: 'bg-pastel-pink text-ptext-pink dark:bg-opacity-20',
-  etc: 'bg-pastel-yellow text-ptext-yellow dark:bg-opacity-20',
-  default: 'bg-bg-tertiary text-text-secondary',
-};
-
 export default function CategorySection({
   categoryValue,
   categoryLabel,
-  categoryIcon,
   todos,
   onToggleComplete,
   onTogglePin,
   onDelete,
   onEdit,
-  selectedDate,
   isExpanded,
   onToggleExpand
 }: CategorySectionProps) {

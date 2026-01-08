@@ -26,11 +26,19 @@ export default function TextInput({
   const [showAlert, setShowAlert] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastDefaultDateRef = useRef<Date>(defaultDate);
 
   useEffect(() => {
-    if (!isSameDay(selectedDate, defaultDate)) {
+    // defaultDate(상단 날짜)가 바뀌었을 때만 selectedDate를 따라가게 합니다.
+    // 사용자가 날짜/시간을 직접 선택한 경우에는 그 값을 유지해야 합니다.
+    const lastDefault = lastDefaultDateRef.current;
+    const wasFollowingDefault = isSameDay(selectedDate, lastDefault);
+
+    if (wasFollowingDefault && !isSameDay(defaultDate, selectedDate)) {
       setSelectedDate(defaultDate);
     }
+
+    lastDefaultDateRef.current = defaultDate;
   }, [defaultDate, selectedDate]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
