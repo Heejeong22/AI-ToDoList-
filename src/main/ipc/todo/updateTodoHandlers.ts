@@ -60,6 +60,17 @@ export async function updateTodo(id: number, updates: any) {
     ...updates,
   }
 
+  // SQLite boolean 호환성 처리 (true -> 1, false -> 0)
+  if (typeof updates.pinned === 'boolean') {
+    updateData.pinned = updates.pinned ? 1 : 0
+  }
+  if (typeof updates.completed === 'boolean') {
+    updateData.completed = updates.completed ? 1 : 0
+  }
+  if (typeof updates.notified === 'boolean') {
+    updateData.notified = updates.notified ? 1 : 0
+  }
+
   if (updates.tags) {
     updateData.tags = JSON.stringify(updates.tags)
   }
