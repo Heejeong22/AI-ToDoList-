@@ -31,6 +31,12 @@ Temporary Items
 ### macOS Patch ###
 *.icloud
 
+# macOS가 자동 생성하는 복사본 파일들
+*\ 2.*
+*\(2\).*
+*\ 2
+*\(2\)
+
 ### Node ###
 # 로그 파일
 logs
